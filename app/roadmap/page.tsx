@@ -1,27 +1,6 @@
 import { Table, TableBody, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { features } from "@/config/features";
 
-export const features = [
-  {
-    done: false,
-    doing: true,
-    feature: 'Create the login system with to allow users to login into the store with their Homey community account',
-  },
-  {
-    done: false,
-    doing: false,
-    feature: 'Create the app submission system to allow developers to submit their apps to the store',
-  },
-  {
-    done: false,
-    doing: false,
-    feature: 'Create the web store implementation to allow users to download apps from the store',
-  },
-  {
-    done: false,
-    doing: false,
-    feature: 'Create the homey app store implementation to allow users to download apps from the store',
-  }
-]
 
 export default function RoadmapPage () {
   return (
