@@ -1,13 +1,21 @@
 export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
-  name: "Next.js",
+  name: "Homey Community Space",
   description:
-    "Beautifully designed components built with Radix UI and Tailwind CSS.",
+    "Homey Community Space is a place for Homey users to share their experiences, ideas and questions.",
   mainNav: [
     {
       title: "Home",
       href: "/",
+    },
+    {
+      title: "Store",
+      href: "/store",
+    },
+    {
+      title: "Roadmap",
+      href: "/roadmap",
     },
   ],
   links: {
