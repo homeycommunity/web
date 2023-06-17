@@ -19,7 +19,7 @@ export const siteConfig = {
     },
   ],
   links: {
-    discord: "https://twitter.com/shadcn",
+    discord: "/discord",
     github: "https://github.com/homeycommunity",
   },
 }
