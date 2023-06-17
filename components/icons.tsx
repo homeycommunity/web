@@ -13,34 +13,7 @@ export const Icons = {
   moon: Moon,
   twitter: Twitter,
   logo: (props: LucideProps) => (
-    <svg viewBox="0 0 60 60" version="1.1" xmlns="http://www.w3.org/2000/svg" {...props}>
-      <defs>
-        <radialGradient gradientUnits="objectBoundingBox" cx="0%" cy="0%" fx="0%" fy="0%" r="141.42134%" gradientTransform="translate(0,0),rotate(45),translate(-0,-0)" id="gradient_1">
-          <stop offset="0%" stop-color="#31F500" />
-          <stop offset="14.284568%" stop-color="#C6FFF8" />
-          <stop offset="32.049976%" stop-color="#8A8EFF" />
-          <stop offset="49.26691%" stop-color="#FF63ED" />
-          <stop offset="65.18086%" stop-color="#FF4444" />
-          <stop offset="83.25931%" stop-color="#FFEE07" />
-          <stop offset="100%" stop-color="#07FF34" />
-        </radialGradient>
-        <path d="M48 0L48 0L48 48L0 48L0 0L48 0Z" id="path_1" />
-        <path d="M24 0C10.7452 0 0 10.7452 0 24C0 37.2548 10.7452 48 24 48C37.2548 48 48 37.2548 48 24C48 10.7452 37.2548 0 24 0ZM24 9.60004C16.0471 9.60004 9.6 16.0471 9.6 24C9.6 31.9529 16.0471 38.4 24 38.4C31.9529 38.4 38.4 31.9529 38.4 24C38.4 16.0471 31.9529 9.60004 24 9.60004Z" id="path_2" />
-        <clipPath id="clip_1">
-          <use href="#path_1" />
-        </clipPath>
-        <clipPath id="clip_2">
-          <use href="#path_2" />
-        </clipPath>
-      </defs>
-      <g id="Frame" clip-path="url(#clip_1)" transform="translate(6 4)">
-        <path d="M48 0L48 0L48 48L0 48L0 0L48 0Z" id="Frame" fill="none" stroke="none" />
-        <g id="Oval-Subtract">
-          <use stroke="none" fill="url(#gradient_1)" href="#path_2" fill-rule="evenodd" />
-
-        </g>
-      </g>
-    </svg>
+    <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" {...props}><defs><linearGradient id="a" x1="0%" x2="100%" y1="0%" y2="100%"><stop offset="0%" stop-color="#31F500" /><stop offset="14.478%" stop-color="#00FFE0" /><stop offset="32.05%" stop-color="#002CFF" /><stop offset="49.267%" stop-color="#FF00E2" /><stop offset="66.313%" stop-color="red" /><stop offset="82.731%" stop-color="#FE0" /><stop offset="100%" stop-color="#31F500" /></linearGradient><linearGradient id="c" x1="50%" x2="50%" y1="0%" y2="100%"><stop offset="0%" stop-color="#FFF" stop-opacity=".5" /><stop offset="100%" stop-color="#686868" stop-opacity=".5" /></linearGradient><path id="b" d="M24 0c13.255 0 24 10.745 24 24S37.255 48 24 48 0 37.255 0 24 10.745 0 24 0Zm0 9.6C16.047 9.6 9.6 16.047 9.6 24S16.047 38.4 24 38.4 38.4 31.953 38.4 24 31.953 9.6 24 9.6Z" /></defs><g fill="none" fill-rule="evenodd"><use href="#b" fill="url(#a)" /><use href="#b" fill="url(#c)" /></g></svg>
   ),
   gitHub: (props: LucideProps) => (
     <svg viewBox="0 0 438.549 438.549" {...props}>
