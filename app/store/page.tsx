@@ -1,5 +1,5 @@
 
-export const features = [
+const features = [
   {
     done: false,
     doing: true,
