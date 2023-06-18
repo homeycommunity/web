@@ -1,12 +1,12 @@
 export const features = [
   {
-    done: false,
-    doing: true,
+    done: true,
+    doing: false,
     feature: 'Create the login system with to allow users to login into the store with their Homey community account',
   },
   {
     done: false,
-    doing: false,
+    doing: true,
     feature: 'Create the app submission system to allow developers to submit their apps to the store',
   },
   {
