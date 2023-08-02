@@ -16,21 +16,21 @@ export const Icons = {
     <svg width="48px" height="48px" viewBox="0 0 48 48" version="1.1" xmlns="http://www.w3.org/2000/svg" {...props}>
       <defs>
         <linearGradient x1="0%" y1="0%" x2="100%" y2="100%" id="linearGradient-1">
-          <stop stop-color="#31F500" offset="0%"></stop>
-          <stop stop-color="#00FFE0" offset="14.4777098%"></stop>
-          <stop stop-color="#002CFF" offset="32.049978%"></stop>
-          <stop stop-color="#FF00E2" offset="49.26691%"></stop>
-          <stop stop-color="#FF0000" offset="66.3133741%"></stop>
-          <stop stop-color="#FFEE00" offset="82.7305507%"></stop>
-          <stop stop-color="#31F500" offset="100%"></stop>
+          <stop stopColor="#31F500" offset="0%"></stop>
+          <stop stopColor="#00FFE0" offset="14.4777098%"></stop>
+          <stop stopColor="#002CFF" offset="32.049978%"></stop>
+          <stop stopColor="#FF00E2" offset="49.26691%"></stop>
+          <stop stopColor="#FF0000" offset="66.3133741%"></stop>
+          <stop stopColor="#FFEE00" offset="82.7305507%"></stop>
+          <stop stopColor="#31F500" offset="100%"></stop>
         </linearGradient>
         <linearGradient x1="50%" y1="0%" x2="50%" y2="100%" id="linearGradient-2">
-          <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="0%"></stop>
-          <stop stop-color="#FFFFFF" stop-opacity="0.5" offset="100%"></stop>
+          <stop stopColor="#FFFFFF" stopOpacity="0.5" offset="0%"></stop>
+          <stop stopColor="#FFFFFF" stopOpacity="0.5" offset="100%"></stop>
         </linearGradient>
         <path d="M24,0 C37.2548333,0 48,10.7451653 48,24 C48,37.2548333 37.2548333,48 24,48 C10.7451653,48 0,37.2548333 0,24 C0,10.7451653 10.7451653,0 24,0 Z M23.9999955,9.600037 C16.0470955,9.600037 9.599997,16.0471368 9.599997,24.0000385 C9.599997,31.9529393 16.0470955,38.40004 23.9999955,38.40004 C31.9528946,38.40004 38.399994,31.9529393 38.399994,24.0000385 C38.399994,16.0471368 31.9528946,9.600037 23.9999955,9.600037 Z" id="path-3"></path>
       </defs>
-      <g id="Frame" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+      <g id="Frame" stroke="none" strokeWidth="1" fill="none" fillRule="evenodd">
         <g id="Oval-Subtract">
           <use fill="url(#linearGradient-1)" href="#path-3"></use>
           <use fill="url(#linearGradient-2)" href="#path-3"></use>

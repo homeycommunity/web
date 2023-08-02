@@ -1,13 +1,13 @@
-import Link from "next/link";
-
 import { authOptions } from "@/app/api/auth/[...nextauth]/route";
 import { Icons } from "@/components/icons";
 import { MainNav } from "@/components/main-nav";
+import { SessionMenu } from "@/components/session-menu";
 import SignIn from "@/components/sign-in";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { buttonVariants } from "@/components/ui/button";
 import { siteConfig } from "@/config/site";
 import { getServerSession } from "next-auth";
+import Link from "next/link";
 
 export async function SiteHeader () {
 
@@ -18,9 +18,9 @@ export async function SiteHeader () {
         <MainNav items={siteConfig.mainNav} />
         <div className="flex flex-1 items-center justify-end space-x-4">
           <nav className="flex items-center space-x-1">
-            {session ? (
-              <span>{session?.user?.name || 'No name'}</span>
-            ) : <SignIn />}
+            {session ?
+              <SessionMenu session={{ name: session?.user?.name }} />
+              : <SignIn />}
             <Link
               href={siteConfig.links.discord}
               target="_blank"

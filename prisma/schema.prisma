@@ -41,15 +41,41 @@ model Session {
 }
 
 model User {
-  id            String    @id @default(cuid())
+  id            String      @id @unique @default(cuid())
   name          String?
-  email         String?   @unique
-  emailVerified DateTime? @map("email_verified")
+  email         String?     @unique
+  emailVerified DateTime?   @map("email_verified")
   image         String?
   accounts      Account[]
   sessions      Session[]
+  app           App[]
+  homeys        Homey[]
+  homeyToken    HomeyToken?
 
   @@map("users")
+}
+
+model HomeyToken {
+  id           String   @id @default(cuid())
+  userId       String   @unique @map("user_id")
+  accessToken  String   @unique @map("access_token")
+  refreshToken String?  @unique @map("refresh_token")
+  expires      DateTime @map("expires_at")
+  User         User?    @relation(fields: [userId], references: [id])
+
+  @@map("homey_tokens")
+}
+
+model Homey {
+  id       String  @id @default(cuid())
+  homeyId  String  @map("homey_id")
+  name     String?
+  User     User?   @relation(fields: [userId], references: [id])
+  userId   String? @map("user_id")
+  eventKey String? @map("event_key")
+
+  @@unique([homeyId, userId])
+  @@map("homey")
 }
 
 model VerificationToken {
@@ -59,4 +85,33 @@ model VerificationToken {
 
   @@unique([identifier, token])
   @@map("verificationtokens")
+}
+
+model App {
+  id          String       @id @default(cuid())
+  authorId    String       @map("author_id")
+  name        String
+  description String?      @db.Text
+  image       String?
+  identifier  String       @unique
+  versions    AppVersion[]
+  author      User         @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@map("apps")
+}
+
+model AppVersion {
+  id           String   @id @default(cuid())
+  appId        String   @map("app_id")
+  version      String
+  file         String?
+  experimental Boolean
+  changelog    String?  @db.Text
+  approved     Boolean
+  available    Boolean
+  publishedAt  DateTime @map("published_at")
+  app          App      @relation(fields: [appId], references: [id], onDelete: Cascade)
+
+  @@unique([appId, version])
+  @@map("app_versions")
 }

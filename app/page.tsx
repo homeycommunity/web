@@ -1,7 +1,6 @@
 import Link from "next/link"
 
 import { buttonVariants } from "@/components/ui/button"
-import { siteConfig } from "@/config/site"
 
 export default function IndexPage () {
   return (
@@ -27,20 +26,7 @@ export default function IndexPage () {
           })}>
           Donate via PayPal
         </Link>
-        <Link
-          href="https://tikkie.me/pay/6d578fn4st5hn0v8knlj"
-          target="_blank" className={buttonVariants({
-            variant: 'teal'
-          })}>
-          Donate via Tikkie
-        </Link>
-        <Link
-          href={siteConfig.mainNav.find(e => e.title === "Roadmap")!.href}
-          target="_blank"
-          className={buttonVariants()}
-        >
-          Roadmap
-        </Link>
+
 
       </div>
     </section>

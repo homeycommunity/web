@@ -14,8 +14,9 @@ export const siteConfig = {
       href: "/store",
     },
     {
-      title: "Roadmap",
-      href: "/roadmap",
+      title: "Download",
+      href: "https://github.com/homeycommunity/desktop",
+      target: "_blank",
     },
   ],
   links: {
