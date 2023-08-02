@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button";
 import { TableCell, TableRow } from "@/components/ui/table";
 import { App, AppVersion, } from "@prisma/client";
-import { UploadCloudIcon } from "lucide-react";
+import { UploadCloud } from "lucide-react";
 import { useRouter } from "next/navigation";
 
 
@@ -19,6 +19,6 @@ export function AppRow ({ app }: { app: App & { versions: AppVersion[] } }) {
     <TableCell><Button size="sm" variant="outline" onClick={(e) => {
       e.stopPropagation()
       router.push(`/control/apps/manage/${app.identifier}/versions/create`)
-    }}><UploadCloudIcon /></Button></TableCell>
+    }}><UploadCloud /></Button></TableCell>
   </TableRow>)
 }
