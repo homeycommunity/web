@@ -6,6 +6,8 @@ import { NextResponse } from "next/server";
 
 export async function GET (request: Request, { params }: { params: { identifier: string, homey: string } }) {
   const session = await getServerSession(authOptions)
+  const url = new URL(request.url)
+  const version = url.searchParams.get('version')
   if (!session || !session.user) {
     return NextResponse.json({
       status: 401,
@@ -38,7 +40,6 @@ export async function GET (request: Request, { params }: { params: { identifier:
     }
   })
 
-  console.log(homey?.homeyId, params);
 
   const emitter = connect({
     host: 'wss://events.homeycommunity.space',
@@ -50,10 +51,11 @@ export async function GET (request: Request, { params }: { params: { identifier:
 
   emitter.publish({
     key: process.env.EMITTER_KEY!,
-    channel: 'homey/' + homey!.homeyId + '/',
+    channel: 'homey/' + homey!.homeyId,
     message: JSON.stringify({
       type: 'install',
-      app: params.identifier
+      app: params.identifier,
+      version
     }),
     ttl: 300
   });
