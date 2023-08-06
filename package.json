@@ -4,7 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build && prisma migrate deploy",
+    "build": "prisma migrate deploy && next build",
     "migrate": "prisma migrate dev",
     "start": "next start",
     "lint": "next lint",
