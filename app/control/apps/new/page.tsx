@@ -1,5 +1,4 @@
 "use client";
-
 import { controlAppsNewSchema } from "@/app/control/apps/new/schema";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -10,7 +9,6 @@ import axios from "axios";
 import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
-
 
 export default function ControlAppsNewPage () {
   const form = useForm<z.infer<typeof controlAppsNewSchema>>({

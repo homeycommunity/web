@@ -1,11 +1,9 @@
-import { getServerSession } from "next-auth"
+import { PrismaClient } from "@prisma/client";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../../../api/auth/[...nextauth]/route";
+import { PageForm as Form } from "./form";
 
-import { PrismaClient } from "@prisma/client"
-
-import { authOptions } from "../../../../api/auth/[...nextauth]/route"
-import { PageForm as Form } from "./form"
-
-export default async function ControlAppsManagePage ({params}: {params: {identifier: string}}) {
+export default async function ControlAppsManagePage ({ params }: { params: { identifier: string } }) {
   const { identifier } = params;
 
   const prisma = new PrismaClient();

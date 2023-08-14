@@ -1,10 +1,6 @@
 "use client";
-
-
-
 import { App } from "@prisma/client";
 import { useState } from "react";
-
 
 export function PageForm ({ app }: { app: App }) {
 

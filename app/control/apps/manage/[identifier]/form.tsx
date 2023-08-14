@@ -1,18 +1,14 @@
 "use client";
-
+import { zodResolver } from "@hookform/resolvers/zod";
+import { App } from "@prisma/client";
+import axios from "axios";
 import {
   useCallback,
   useState,
-} from "react"
-
-import axios from "axios"
-import { useForm } from "react-hook-form"
-import { z } from "zod"
-
-import { zodResolver } from "@hookform/resolvers/zod"
-import { App } from "@prisma/client"
-
-import { Button } from "../../../../../components/ui/button"
+} from "react";
+import { useForm } from "react-hook-form";
+import { z } from "zod";
+import { Button } from "../../../../../components/ui/button";
 import {
   Form,
   FormControl,
@@ -21,12 +17,12 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "../../../../../components/ui/form"
-import { Input } from "../../../../../components/ui/input"
-import { Textarea } from "../../../../../components/ui/textarea"
-import { controlAppsManageSchema } from "./schema"
+} from "../../../../../components/ui/form";
+import { Input } from "../../../../../components/ui/input";
+import { Textarea } from "../../../../../components/ui/textarea";
+import { controlAppsManageSchema } from "./schema";
 
-export function PageForm ({app}: {app: App}) {
+export function PageForm ({ app }: { app: App }) {
 
 
 
@@ -96,18 +92,18 @@ export function PageForm ({app}: {app: App}) {
             <FormField
               control={form.control}
               defaultValue={app.identifier}
-                name="id"
+              name="id"
               render={({ field }) => (
                 <>
-                <FormItem>
-                  <FormLabel>Unique Identifier</FormLabel>
-                  <FormControl>
-                    <Input {...field} name='_identifier' value={app.identifier} readOnly />
-                  </FormControl>
-                  <FormDescription>same as defined in manifest.json (used for validation later on)</FormDescription>
-                  <FormMessage />
-                </FormItem>
-                <Input type="hidden" {...field} />
+                  <FormItem>
+                    <FormLabel>Unique Identifier</FormLabel>
+                    <FormControl>
+                      <Input {...field} name='_identifier' value={app.identifier} readOnly />
+                    </FormControl>
+                    <FormDescription>same as defined in manifest.json (used for validation later on)</FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                  <Input type="hidden" {...field} />
                 </>
               )}
             />
@@ -118,4 +114,4 @@ export function PageForm ({app}: {app: App}) {
       </div>
     </section>
   )
-              }
+}

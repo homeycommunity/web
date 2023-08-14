@@ -1,9 +1,6 @@
-import { getServerSession } from "next-auth"
-
 import { authOptions } from "@/app/api/auth/[...nextauth]/route"
-import { AppRow } from "@/app/control/apps/app-row"
-
 import { AppPlus } from "@/app/control/apps/app-plus"
+import { AppRow } from "@/app/control/apps/app-row"
 import {
   Table,
   TableBody,
@@ -12,7 +9,7 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { PrismaClient } from "@prisma/client"
-
+import { getServerSession } from "next-auth"
 
 export default async function Page () {
 
