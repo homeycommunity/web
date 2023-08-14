@@ -83,6 +83,13 @@ export async function POST (req: Request) {
       }
     })
 
+    return NextResponse.json({
+      'message': 'Uploaded',
+      status: 200
+    }, {
+      status: 200
+    })
+
   }
   catch (e) {
     console.log(e);

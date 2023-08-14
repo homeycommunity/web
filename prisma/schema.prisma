@@ -104,7 +104,7 @@ model AppVersion {
   id           String   @id @default(cuid())
   appId        String   @map("app_id")
   version      String
-  file         String?
+  file         String
   experimental Boolean
   changelog    String?  @db.Text
   approved     Boolean
