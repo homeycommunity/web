@@ -3,8 +3,9 @@ import { PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 // unzip
-import AdmZip from "adm-zip";
 import { Client } from 'minio';
+import { Readable } from "stream";
+import { tarGzGlob } from "targz-glob";
 // with file
 
 export async function POST (req: Request) {
@@ -41,11 +42,21 @@ export async function POST (req: Request) {
     // blob to zip
 
     const app = body.get('id') as string;
-    const fileBlob = Buffer.from(await (body.get('file') as Blob).arrayBuffer());
-    const z = new AdmZip(fileBlob);
-
-    const appInfo = JSON.parse(z.getEntry('app.json')?.getData().toString('utf8')!);
-    const filename = appInfo.id + '@' + appInfo.version + '.zip'
+    const bodyFile = body.get('file') as File;
+    const fileBlob = Buffer.from(await (bodyFile).arrayBuffer());
+    const archive = Readable.from(fileBlob);
+    const tarFile = bodyFile.name.replace(/\.tar\.gz$/, '');
+    const z = await tarGzGlob(archive, 'app.json');
+    const appInfo = JSON.parse(z.get('app.json')! || "{}");
+    if (!appInfo?.id || !appInfo?.version) {
+      return NextResponse.json({
+        'message': 'Not a valid app.json',
+        status: 409
+      }, {
+        status: 409
+      })
+    }
+    const filename = appInfo.id + '@' + appInfo.version + '.tar.gz'
     const appDb = await prisma.app.findFirst({
       where: {
         id: app
