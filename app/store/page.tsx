@@ -33,7 +33,7 @@ export default async function StorePage () {
           {apps.map(app =>
             <Card>
               <CardHeader>
-                <CardTitle>{app.name}{app.versions[app.versions.length - 1].experimental ? <><br /><Badge variant="destructive">experimental</Badge></> : null}</CardTitle>
+                <CardTitle>{app.name}{app.versions[app.versions.length - 1]?.experimental ? <><br /><Badge variant="destructive">experimental</Badge></> : null}</CardTitle>
               </CardHeader>
               <CardContent>{app.description}</CardContent>
               <CardFooter>
