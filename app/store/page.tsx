@@ -12,7 +12,7 @@ export default async function StorePage () {
   const apps = await prisma.app.findMany({
     where: {
       versions: {
-        every: {}
+        some: {}
       }
     },
     include: {
