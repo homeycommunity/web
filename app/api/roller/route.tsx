@@ -15,7 +15,7 @@ export async function GET () {
       a.set('refresh_token', token.refreshToken!)
 
       const data = await axios.post('https://api.athom.com/oauth2/token', a.toString());
-
+      ;
       await prisma.homeyToken.update({
         where: {
           id: token.id
