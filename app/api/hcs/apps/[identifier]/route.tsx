@@ -20,7 +20,7 @@ export async function GET (req: NextRequest, { params }: { params: { identifier:
       }
     })
   }
-  const data = await axios.get('https://auth.homeycommunity.space/application/o/userinfo', {
+  const data = await axios.get('https://auth.homeycommunity.space/application/o/userinfo/', {
     headers: {
       Authorization: auth
     }

@@ -21,7 +21,7 @@ export async function POST (req: NextRequest) {
       }
     })
   }
-  const data = await axios.get('https://auth.homeycommunity.space/application/o/userinfo', {
+  const data = await axios.get('https://auth.homeycommunity.space/application/o/userinfo/', {
     headers: {
       Authorization: auth
     }
