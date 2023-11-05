@@ -4,7 +4,7 @@ import { connect } from "emitter-io";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
-export async function GET (request: Request, { params }: { params: { identifier: string, homey: string } }) {
+export async function POST (request: Request, { params }: { params: { identifier: string, homey: string } }) {
   const session = await getServerSession(authOptions)
   const url = new URL(request.url)
   const version = url.searchParams.get('version')
