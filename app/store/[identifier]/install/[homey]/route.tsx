@@ -47,18 +47,22 @@ export async function GET (request: Request, { params }: { params: { identifier:
     secure: true
   }).on('error', (e) => {
     console.log(e)
-  });
+  }).on('connect', () => {
+    console.log('connected')
+    emitter.publish({
+      key: process.env.EMITTER_KEY!,
+      channel: 'homey/' + homey!.homeyId,
+      message: JSON.stringify({
+        type: 'install',
+        app: params.identifier,
+        version
+      }),
+      ttl: 300
+    });
+    console.log(`published ${'homey/' + homey!.homeyId}`)
+  })
 
-  emitter.publish({
-    key: process.env.EMITTER_KEY!,
-    channel: 'homey/' + homey!.homeyId,
-    message: JSON.stringify({
-      type: 'install',
-      app: params.identifier,
-      version
-    }),
-    ttl: 300
-  });
+
 
 
   //emitter.disconnect();
