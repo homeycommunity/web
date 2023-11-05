@@ -12,7 +12,7 @@ export async function OPTIONS (req: NextRequest) {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
-export async function GET (req: NextRequest, { params }: { params: { identifier: string, version: string } }, res: NextResponse) {
+export async function POST (req: NextRequest, { params }: { params: { identifier: string, version: string } }, res: NextResponse) {
   const auth = req.headers.get('authorization');
   if (!auth) {
     return new Response('{}', {
