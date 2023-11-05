@@ -20,7 +20,7 @@ export function StoreIdentifierView ({ app, homeys }: { app: App & { versions: A
       </p>
       {homeys.map((homey) => {
         return <Button variant="blue" onClick={(e) => {
-          fetch('/api/store/' + app.identifier + '/install/' + homey.id + '?version=' + app.versions[0].version, {
+          fetch('/store/' + app.identifier + '/install/' + homey.id + '?version=' + app.versions[0].version, {
             method: 'POST'
           }).then(() => {
             toast({
