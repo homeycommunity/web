@@ -1,7 +1,10 @@
 import { PrismaClient } from "@prisma/client";
 import axios from "axios";
 
-export async function GET () {
+export async function GET (request: Request) {
+  if (process.env.ROLLER_KEY === request.headers.get('x-roller-key')) {
+    return new Response(JSON.stringify({}));
+  }
   const prisma = new PrismaClient();
   const tokens = await prisma.homeyToken.findMany();
   for (const token of tokens) {
