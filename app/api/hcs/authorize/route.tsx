@@ -84,7 +84,7 @@ export async function POST (req: NextRequest) {
           emitter.disconnect();
           resolve(true);
         }).keygen({
-          key: process.env.EMITTER_KEY!,
+          key: process.env.EMITTER_KEYGEN!,
           channel: 'homey/' + homey.id + '/',
           type: 'r',
           ttl: 0
