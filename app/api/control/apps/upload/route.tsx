@@ -46,8 +46,11 @@ export async function POST (req: Request) {
     const fileBlob = Buffer.from(await (bodyFile).arrayBuffer());
     const archive = Readable.from(fileBlob);
     const tarFile = bodyFile.name.replace(/\.tar\.gz$/, '');
-    const z = await tarGzGlob(archive, 'app.json');
-    const appInfo = JSON.parse(z.get('app.json')! || "{}");
+    const z = await tarGzGlob(archive, [
+      "./app.json",
+      "app.json",
+    ]);
+    const appInfo = JSON.parse(z.get('app.json')! || z.get('./app.json')! || "{}");
     if (!appInfo?.id || !appInfo?.version) {
       return NextResponse.json({
         'message': 'Not a valid app.json',

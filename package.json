@@ -3,7 +3,7 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbo",
+    "dev": "next dev",
     "build": "prisma migrate deploy && next build",
     "migrate": "prisma migrate dev",
     "start": "next start",
@@ -44,7 +44,7 @@
     "sharp": "^0.32.6",
     "tailwind-merge": "^2.0.0",
     "tailwindcss-animate": "^1.0.7",
-    "targz-glob": "^0.0.3",
+    "targz-glob": "^0.0.5",
     "utf-8-validate": "^6.0.3",
     "zod": "^3.22.4"
   },
