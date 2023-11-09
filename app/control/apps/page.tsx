@@ -50,6 +50,7 @@ export default async function Page () {
           <TableHead>Identifier</TableHead>
           <TableHead>Version</TableHead>
           <TableHead>Push Version</TableHead>
+          <TableHead>Delete</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>

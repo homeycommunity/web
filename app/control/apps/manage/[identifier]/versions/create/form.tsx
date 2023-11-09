@@ -30,7 +30,7 @@ export function PageForm ({ app }: { app: App }) {
     });
     const data = await response.json();
     if (data.status == 200) {
-      router.push('/control/apps/manage')
+      router.push('/control/apps')
     }
   };
 
