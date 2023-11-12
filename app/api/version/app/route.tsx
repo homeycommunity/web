@@ -16,5 +16,5 @@ export async function GET () {
     url: repo.data.assets.find(asset => asset.name.endsWith('homeycommunityspace.tar.gz'))?.browser_download_url,
   }
 
-  return new NextResponse(JSON.stringify(output));
+  return NextResponse.json(output);
 }

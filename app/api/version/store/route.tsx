@@ -17,5 +17,5 @@ export async function GET () {
     mac: repo.data.assets.find(asset => asset.name.endsWith('dmg'))?.browser_download_url,
   }
 
-  return new NextResponse(JSON.stringify(output));
+  return NextResponse.json(output);
 }

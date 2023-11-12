@@ -94,5 +94,11 @@ export async function GET (req: NextRequest, { params }: { params: { identifier:
 
 
 
-  return new NextResponse(await stream2buffer(file));
+  return new NextResponse(await stream2buffer(file), {
+    headers: {
+      "Content-Type": "application/gzip",
+      "Content-Disposition": `attachment; filename="${app.identifier}.tar.gz"`,
+      ...corsHeaders,
+    }
+  });
 }
