@@ -30,7 +30,7 @@ export default async function StorePage () {
         <p className="max-w-[700px] text-lg text-muted-foreground">
           The Homey Community Store is a place where you can find third-party apps for Homey.
         </p>
-        <div className="grid-cols-3 gap-2">
+        <div className="grid grid-flow-row auto-rows-max grid-cols-3 gap-2">
           {apps.map(app =>
             <Card >
               <CardHeader>
