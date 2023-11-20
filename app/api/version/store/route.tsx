@@ -2,6 +2,7 @@ import { Octokit } from "@octokit/rest";
 import { NextResponse } from "next/server";
 
 export const dynamic = 'force-dynamic';
+export const fetchCache = 'force-no-store';
 export async function GET () {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,

@@ -2,6 +2,10 @@ import { Badge } from "@/components/ui/badge";
 import { Octokit } from "@octokit/rest";
 
 
+export const fetchCache = 'force-no-store';
+export const dynamic = 'force-dynamic';
+
+
 export default async function DownloadPage () {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
