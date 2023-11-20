@@ -30,9 +30,9 @@ export default async function StorePage () {
         <p className="max-w-[700px] text-lg text-muted-foreground">
           The Homey Community Store is a place where you can find third-party apps for Homey.
         </p>
-        <div className="columns mt-10">
+        <div className="columns-3xs mt-10">
           {apps.map(app =>
-            <Card>
+            <Card >
               <CardHeader>
                 <CardTitle>{app.name}{app.versions[app.versions.length - 1]?.experimental ? <><br /><Badge variant="destructive">experimental</Badge></> : null}</CardTitle>
               </CardHeader>
