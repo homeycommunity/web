@@ -8,6 +8,7 @@ import { Readable } from "stream";
 import { tarGzGlob } from "targz-glob";
 // with file
 
+export const dynamic = 'force-dynamic';
 export async function POST (req: Request) {
 
   try {

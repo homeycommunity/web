@@ -11,6 +11,8 @@ import {
   controlAppsManageSchema,
 } from "../../../../control/apps/manage/[identifier]/schema"
 
+
+export const dynamic = 'force-dynamic';
 export const POST = async (req: NextRequest) => {
 
   try {

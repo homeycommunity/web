@@ -8,6 +8,7 @@ const corsHeaders = {
 export async function OPTIONS (req: NextRequest) {
   return NextResponse.json({}, { headers: corsHeaders });
 }
+export const dynamic = 'force-dynamic';
 export async function GET () {
   const prisma = new PrismaClient();
 

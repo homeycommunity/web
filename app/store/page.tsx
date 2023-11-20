@@ -5,6 +5,7 @@ import { PrismaClient } from "@prisma/client";
 import Link from "next/link";
 
 
+export const dynamic = 'force-dynamic';
 
 export default async function StorePage () {
   const prisma = new PrismaClient();

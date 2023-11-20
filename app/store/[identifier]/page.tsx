@@ -4,6 +4,7 @@ import { Homey, PrismaClient } from "@prisma/client";
 import { getServerSession } from "next-auth";
 
 
+export const dynamic = 'force-dynamic';
 
 export default async function StorePage ({ params }: { params: { identifier: string } }) {
   const prisma = new PrismaClient();

@@ -12,6 +12,8 @@ export async function OPTIONS (req: NextRequest) {
   return NextResponse.json({}, { headers: corsHeaders });
 }
 
+export const dynamic = 'force-dynamic';
+
 export async function GET (req: NextRequest, { params }: { params: { identifier: string, version: string } }, res: NextResponse) {
   const auth = req.headers.get('authorization');
   if (!auth) {

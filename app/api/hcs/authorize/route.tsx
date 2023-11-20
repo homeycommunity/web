@@ -10,6 +10,7 @@ const corsHeaders = {
 export async function OPTIONS (req: NextRequest) {
   return NextResponse.json({}, { headers: corsHeaders });
 }
+export const dynamic = 'force-dynamic';
 
 export async function POST (req: NextRequest) {
   const auth = req.headers.get('authorization');

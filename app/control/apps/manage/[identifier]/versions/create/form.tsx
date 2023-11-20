@@ -5,6 +5,7 @@ import { App } from "@prisma/client";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+export const dynamic = 'force-dynamic';
 export function PageForm ({ app }: { app: App }) {
 
   const [tarGz, setTarGz] = useState(null);

@@ -10,6 +10,7 @@ import { useCallback, useState } from "react";
 import { useForm } from "react-hook-form";
 import * as z from "zod";
 
+export const dynamic = 'force-dynamic';
 export default function ControlAppsNewPage () {
   const form = useForm<z.infer<typeof controlAppsNewSchema>>({
     resolver: zodResolver(controlAppsNewSchema),

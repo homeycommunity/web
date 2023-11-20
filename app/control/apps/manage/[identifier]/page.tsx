@@ -3,6 +3,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "../../../../api/auth/[...nextauth]/route";
 import { PageForm as Form } from "./form";
 
+export const dynamic = 'force-dynamic';
 export default async function ControlAppsManagePage ({ params }: { params: { identifier: string } }) {
   const { identifier } = params;
 

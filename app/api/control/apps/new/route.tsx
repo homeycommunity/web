@@ -3,6 +3,9 @@ import { controlAppsNewSchema } from '@/app/control/apps/new/schema';
 import { PrismaClient } from '@prisma/client';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
+
+export const dynamic = 'force-dynamic';
+
 export const POST = async (req: NextRequest) => {
 
   try {

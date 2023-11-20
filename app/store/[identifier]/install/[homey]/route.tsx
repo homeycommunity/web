@@ -4,6 +4,7 @@ import { connect } from "emitter-io";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
 
+export const dynamic = 'force-dynamic';
 export async function POST (request: Request, { params }: { params: { identifier: string, homey: string } }) {
   const session = await getServerSession(authOptions)
   const url = new URL(request.url)
