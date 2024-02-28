@@ -1,8 +1,12 @@
-"use client";
+"use client"
 
-import { signIn } from "next-auth/react";
-import Link from "next/link";
+import Link from "next/link"
+import { signIn } from "next-auth/react"
 
-export default function SignIn () {
-  return <Link href="#" onClick={() => signIn('authentik')}>Sign in</Link>
+export default function SignIn() {
+  return (
+    <Link href="#" onClick={() => signIn("zitadel")}>
+      Sign in
+    </Link>
+  )
 }
