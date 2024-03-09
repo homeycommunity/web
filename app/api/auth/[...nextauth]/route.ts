@@ -20,7 +20,7 @@ export const authOptions: NextAuthOptions = {
         process.env.ZITADEL_ISSUER + "/.well-known/openid-configuration",
       authorization: {
         params: {
-          scope: `openid email profile urn:zitadel:iam:org:project:id:${process.env.ZITADEL_PROJECT_ID}:aud`,
+          scope: `openid email profile offline_access urn:zitadel:iam:org:project:id:${process.env.ZITADEL_PROJECT_ID}:aud`,
         },
       },
       profile: (profile) => {
@@ -32,6 +32,7 @@ export const authOptions: NextAuthOptions = {
         }
       },
       idToken: true,
+
       checks: ["pkce", "state"],
       client: {
         token_endpoint_auth_method: "none",
