@@ -1,50 +1,50 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
-import { StoreIdentifierView } from "@/app/store/[identifier]/view";
-import { Homey, PrismaClient } from "@prisma/client";
-import { getServerSession } from "next-auth";
+import { Homey, PrismaClient } from "@prisma/client"
+import { getServerSession } from "next-auth"
 
+import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { StoreIdentifierView } from "@/app/store/[identifier]/view"
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic"
 
-export default async function StorePage ({ params }: { params: { identifier: string } }) {
-  const prisma = new PrismaClient();
+export default async function StorePage({
+  params,
+}: {
+  params: { identifier: string }
+}) {
+  const prisma = new PrismaClient()
   const session = await getServerSession(authOptions)
-  let homeys: Homey[] = [];
+  let homeys: Homey[] = []
   if (session && session.user) {
     const user = await prisma.user.findUnique({
       where: {
-        email: session?.user?.email!
-      }
+        email: session?.user?.email!,
+      },
     })
     homeys = await prisma.homey.findMany({
       where: {
-        userId: user?.id
-      }
-    });
+        userId: user?.id,
+      },
+    })
   }
-
-
 
   const app = await prisma.app.findFirst({
     where: {
-      identifier: params.identifier
+      identifier: params.identifier,
     },
     include: {
       versions: {
         orderBy: {
-          version: 'desc'
+          version: "desc",
         },
-        take: 1
+        take: 1,
       },
-      author: true
-    }
-  });
+      author: true,
+    },
+  })
 
   if (!app) {
     return <h1>404 not found</h1>
   }
 
-  return (
-    <StoreIdentifierView app={app} homeys={homeys} />
-  )
+  return <StoreIdentifierView app={app} homeys={homeys} />
 }

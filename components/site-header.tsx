@@ -8,7 +8,7 @@ import { MainNav } from "@/components/main-nav"
 import { SessionMenu } from "@/components/session-menu"
 import SignIn from "@/components/sign-in"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"
+import { authOptions } from "@/app/api/auth/[...nextauth]/options"
 
 export async function SiteHeader() {
   const session = await getServerSession(authOptions)
