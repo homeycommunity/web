@@ -13,12 +13,14 @@ export const authOptions: NextAuthOptions = {
       name: "zitadel",
       type: "oauth",
       version: "2",
+
       allowDangerousEmailAccountLinking: true,
       wellKnown:
         process.env.ZITADEL_ISSUER + "/.well-known/openid-configuration",
       authorization: {
         params: {
           scope: `openid email profile offline_access urn:zitadel:iam:org:project:id:${process.env.ZITADEL_PROJECT_ID}:aud`,
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/zitadel/callback`,
         },
       },
       profile: (profile) => {
