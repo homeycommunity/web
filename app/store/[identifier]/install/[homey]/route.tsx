@@ -1,16 +1,15 @@
 import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 import { connect } from "emitter-io"
-import { getServerSession } from "next-auth"
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 
 export const dynamic = "force-dynamic"
 export async function POST(
   request: Request,
   { params }: { params: { identifier: string; homey: string } }
 ) {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const url = new URL(request.url)
   const version = url.searchParams.get("version")
   if (!session || !session.user) {

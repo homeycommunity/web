@@ -1,15 +1,14 @@
 import { NextRequest, NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 import { controlAppsNewSchema } from "@/app/control/apps/new/schema"
 
 export const dynamic = "force-dynamic"
 
 export const POST = async (req: NextRequest) => {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session || !session.user) {
       return NextResponse.json(
         {

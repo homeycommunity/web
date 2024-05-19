@@ -1,5 +1,4 @@
 import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
 
 import {
   Table,
@@ -8,13 +7,13 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 import { AppPlus } from "@/app/control/apps/app-plus"
 import { AppRow } from "@/app/control/apps/app-row"
 
 export default async function Page() {
   const prisma = new PrismaClient()
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const user = await prisma.user.findUnique({
     where: {
       email: session?.user?.email!,

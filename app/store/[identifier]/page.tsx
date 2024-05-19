@@ -1,7 +1,6 @@
 import { Homey, PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 import { StoreIdentifierView } from "@/app/store/[identifier]/view"
 
 export const dynamic = "force-dynamic"
@@ -12,7 +11,7 @@ export default async function StorePage({
   params: { identifier: string }
 }) {
   const prisma = new PrismaClient()
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   let homeys: Homey[] = []
   if (session && session.user) {
     const user = await prisma.user.findUnique({

@@ -1,9 +1,3 @@
-import NextAuth from "next-auth"
+import { handlers } from "@/app/auth"
 
-import { authOptions } from "./options"
-
-export const dynamic = "force-dynamic"
-
-const handler = NextAuth(authOptions)
-
-export { handler as GET, handler as POST }
+export const { GET, POST } = handlers

@@ -1,37 +1,27 @@
-import { PrismaAdapter } from "@next-auth/prisma-adapter"
+import { PrismaAdapter } from "@auth/prisma-adapter"
 import { PrismaClient } from "@prisma/client"
-import { type NextAuthOptions } from "next-auth"
+import NextAuth from "next-auth"
 import type { Provider } from "next-auth/providers"
 
 const prisma = new PrismaClient()
 
-export const authOptions: NextAuthOptions = {
+export const { auth, handlers, signIn, signOut } = NextAuth({
   adapter: PrismaAdapter(prisma),
   providers: [
     {
       id: "zitadel",
       name: "zitadel",
-      type: "oauth",
-      version: "2",
+      type: "oidc",
 
       allowDangerousEmailAccountLinking: true,
-      wellKnown:
-        process.env.ZITADEL_ISSUER + "/.well-known/openid-configuration",
+      issuer: process.env.ZITADEL_ISSUER,
       authorization: {
         params: {
           scope: `openid email profile offline_access urn:zitadel:iam:org:project:id:${process.env.ZITADEL_PROJECT_ID}:aud`,
-          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/zitadel/callback`,
+          redirect_uri: `${process.env.NEXTAUTH_URL}/api/auth/callback/zitadel`,
         },
       },
-      profile: (profile) => {
-        return {
-          id: profile.sub,
-          name: profile.name,
-          email: profile.email,
-          image: profile.picture,
-        }
-      },
-      idToken: true,
+      token: true,
 
       checks: ["pkce", "state"],
       client: {
@@ -41,4 +31,4 @@ export const authOptions: NextAuthOptions = {
       clientId: process.env.ZITADEL_CLIENT_ID,
     } satisfies Provider,
   ],
-}
+})

@@ -1,5 +1,4 @@
 import Link from "next/link"
-import { getServerSession } from "next-auth"
 
 import { siteConfig } from "@/config/site"
 import { buttonVariants } from "@/components/ui/button"
@@ -8,10 +7,10 @@ import { MainNav } from "@/components/main-nav"
 import { SessionMenu } from "@/components/session-menu"
 import SignIn from "@/components/sign-in"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 
 export async function SiteHeader() {
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   console.log(session)
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">

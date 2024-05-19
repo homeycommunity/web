@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client"
-import { getServerSession } from "next-auth"
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 
 import { PageForm as Form } from "./form"
 
@@ -14,7 +13,7 @@ export default async function ControlAppsCreateVersionPage({
   const { identifier } = params
 
   const prisma = new PrismaClient()
-  const session = await getServerSession(authOptions)
+  const session = await auth()
   const user = await prisma.user.findUnique({
     where: {
       email: session?.user?.email!,

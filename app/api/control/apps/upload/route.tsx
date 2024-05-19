@@ -3,17 +3,16 @@ import { NextResponse } from "next/server"
 import { PrismaClient } from "@prisma/client"
 // unzip
 import { Client } from "minio"
-import { getServerSession } from "next-auth"
 import { tarGzGlob } from "targz-glob"
 
-import { authOptions } from "@/app/api/auth/[...nextauth]/options"
+import { auth } from "@/app/auth"
 
 // with file
 
 export const dynamic = "force-dynamic"
 export async function POST(req: Request) {
   try {
-    const session = await getServerSession(authOptions)
+    const session = await auth()
     if (!session || !session.user) {
       return NextResponse.json(
         {
