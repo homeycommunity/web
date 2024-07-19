@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
-
-import { auth } from "@/app/auth"
 
 import { controlAppsManageSchema } from "../../../../control/apps/manage/[identifier]/schema"
 

@@ -1,6 +1,5 @@
+import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
-
-import { auth } from "@/app/auth"
 
 import { PageForm as Form } from "./form"
 

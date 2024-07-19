@@ -1,6 +1,6 @@
+import { auth } from "@/auth"
 import { Homey, PrismaClient } from "@prisma/client"
 
-import { auth } from "@/app/auth"
 import { StoreIdentifierView } from "@/app/store/[identifier]/view"
 
 export const dynamic = "force-dynamic"

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
 
-import { auth } from "@/app/auth"
 import { controlAppsNewSchema } from "@/app/control/apps/new/schema"
 
 export const dynamic = "force-dynamic"

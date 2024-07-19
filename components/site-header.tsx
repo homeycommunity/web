@@ -1,4 +1,7 @@
+"use server"
+
 import Link from "next/link"
+import { auth } from "@/auth"
 
 import { siteConfig } from "@/config/site"
 import { buttonVariants } from "@/components/ui/button"
@@ -7,11 +10,9 @@ import { MainNav } from "@/components/main-nav"
 import { SessionMenu } from "@/components/session-menu"
 import SignIn from "@/components/sign-in"
 import { ThemeToggle } from "@/components/theme-toggle"
-import { auth } from "@/app/auth"
 
 export async function SiteHeader() {
   const session = await auth()
-  console.log(session)
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background">
       <div className="container flex h-16 items-center space-x-4 sm:justify-between sm:space-x-0">
@@ -49,7 +50,7 @@ export async function SiteHeader() {
                   variant: "ghost",
                 })}
               >
-                <Icons.gitHub className="h-5 w-5" />
+                <Icons.gitHub className="size-5" />
                 <span className="sr-only">GitHub</span>
               </div>
             </Link>

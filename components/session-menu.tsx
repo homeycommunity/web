@@ -9,7 +9,8 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import { signOut } from "@/app/auth"
+
+import Logout from "./logout"
 
 export const SessionMenu = (props: any) => {
   const router = useRouter()
@@ -27,13 +28,7 @@ export const SessionMenu = (props: any) => {
           My Apps
         </DropdownMenuItem>
         <DropdownMenuSeparator />
-        <DropdownMenuItem
-          onClick={() => {
-            signOut()
-          }}
-        >
-          Logout
-        </DropdownMenuItem>
+        <Logout />
       </DropdownMenuContent>
     </DropdownMenu>
   )

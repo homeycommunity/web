@@ -94,7 +94,7 @@ export async function GET(
   }
 
   var minioClient = new Client({
-    endPoint: "drive.homeycommunity.space",
+    endPoint: "storage.homeycommunity.space",
     port: 443,
     useSSL: true,
     accessKey: process.env.MINIO_TOKEN!,
