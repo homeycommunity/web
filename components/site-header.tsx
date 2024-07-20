@@ -1,6 +1,5 @@
 "use server"
 
-import Link from "next/link"
 import { auth } from "@/auth"
 
 import { siteConfig } from "@/config/site"
@@ -24,11 +23,7 @@ export async function SiteHeader() {
             ) : (
               <SignIn />
             )}
-            <Link
-              href={siteConfig.links.discord}
-              target="_blank"
-              rel="noreferrer"
-            >
+            <a href={siteConfig.links.discord} target="_blank" rel="noreferrer">
               <div
                 className={buttonVariants({
                   size: "sm",
@@ -38,12 +33,8 @@ export async function SiteHeader() {
                 <Icons.discord className="size-5" />
                 <span className="sr-only">Discord</span>
               </div>
-            </Link>
-            <Link
-              href={siteConfig.links.github}
-              target="_blank"
-              rel="noreferrer"
-            >
+            </a>
+            <a href={siteConfig.links.github} target="_blank" rel="noreferrer">
               <div
                 className={buttonVariants({
                   size: "sm",
@@ -53,7 +44,7 @@ export async function SiteHeader() {
                 <Icons.gitHub className="size-5" />
                 <span className="sr-only">GitHub</span>
               </div>
-            </Link>
+            </a>
 
             <ThemeToggle />
           </nav>
