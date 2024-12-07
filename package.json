@@ -48,7 +48,7 @@
     "tailwind-merge": "^2.5.5",
     "tailwindcss-animate": "^1.0.7",
     "targz-glob": "^0.0.5",
-    "utf-8-validate": "^6.0.5",
+    "utf-8-validate": "^5.0.10",
     "zod": "^3.23.8"
   },
   "devDependencies": {
