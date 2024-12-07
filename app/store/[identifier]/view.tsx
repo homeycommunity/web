@@ -106,7 +106,7 @@ export function StoreIdentifierView({
         )}
 
         {homeys.length === 0 && (
-          <Card className="bg-gradient-to-b from-background to-background/80 border-primary/10 border-blue-500/30">
+          <Card className="bg-gradient-to-b from-background to-background/80 border-blue-500/30">
             <CardHeader>
               <CardTitle>No Homeys Connected</CardTitle>
               <CardDescription>

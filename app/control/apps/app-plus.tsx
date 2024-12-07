@@ -17,7 +17,7 @@ export const AppPlus = () => {
         router.push("/control/apps/new")
       }}
     >
-      <PlusCircleIcon className="h-5 w-5" />
+      <PlusCircleIcon className="size-5" />
     </Button>
   )
 }
