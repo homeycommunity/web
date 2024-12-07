@@ -87,7 +87,7 @@ export async function POST(req: Request) {
     }
 
     var minioClient = new Client({
-      endPoint: "drive.homeycommunity.space",
+      endPoint: process.env.MINIO_ENDPOINT!,
       port: 443,
       useSSL: true,
       accessKey: process.env.MINIO_TOKEN!,
@@ -119,5 +119,12 @@ export async function POST(req: Request) {
     )
   } catch (e) {
     console.log(e)
+    return NextResponse.json(
+      {
+        message: (e as Error).message,
+        status: 500,
+      },
+      { status: 500 }
+    )
   }
 }

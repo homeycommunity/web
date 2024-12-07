@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
 import { connect } from "emitter-io"
+import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 export async function POST(

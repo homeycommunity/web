@@ -16,7 +16,6 @@ export const siteConfig = {
     {
       title: "Download",
       href: "/download",
-      target: "_blank",
     },
   ],
   links: {

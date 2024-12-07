@@ -1,5 +1,14 @@
 import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
+import { AlertCircle, Package } from "lucide-react"
+
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card"
 
 import { PageForm as Form } from "./form"
 
@@ -9,7 +18,7 @@ export default async function ControlAppsManagePage({
 }: {
   params: { identifier: string }
 }) {
-  const { identifier } = params
+  const { identifier } = await params
 
   const prisma = new PrismaClient()
   const session = await auth()
@@ -33,15 +42,53 @@ export default async function ControlAppsManagePage({
 
   if (!app) {
     return (
-      <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-        <div className="flex max-w-[980px] flex-col items-start gap-2">
-          <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">
-            App not found
-          </h1>
-        </div>
+      <section className="container max-w-3xl mx-auto py-10">
+        <Card className="border-destructive">
+          <CardHeader>
+            <div className="flex items-center gap-2">
+              <AlertCircle className="h-5 w-5 text-destructive" />
+              <CardTitle className="text-destructive">App Not Found</CardTitle>
+            </div>
+            <CardDescription>
+              The app with identifier &quot;{identifier}&quot; could not be
+              found or you don&apos;t have access to it.
+            </CardDescription>
+          </CardHeader>
+        </Card>
       </section>
     )
   }
 
-  return <Form app={app} />
+  return (
+    <section className="container relative min-h-screen">
+      <div className="absolute inset-0 -z-10">
+        <div className="absolute inset-0 bg-[radial-gradient(#e5e7eb_1px,transparent_1px)] [background-size:16px_16px] [mask-image:radial-gradient(ellipse_50%_50%_at_50%_50%,black_70%,transparent_100%)] dark:bg-[radial-gradient(#1f2937_1px,transparent_1px)]" />
+      </div>
+      <div className="relative grid items-center gap-10 pb-8 pt-6 md:py-10">
+        <div className="flex max-w-[980px] flex-col items-start gap-4">
+          <div className="flex items-center gap-3">
+            <Package className="h-10 w-10 text-blue-500" />
+            <h1 className="text-4xl font-extrabold leading-tight tracking-tighter md:text-5xl bg-clip-text text-transparent bg-gradient-to-r from-blue-600 via-purple-500 to-teal-400 [background-size:200%_auto] animate-text">
+              Manage App
+            </h1>
+          </div>
+          <p className="max-w-[700px] text-xl text-muted-foreground leading-relaxed">
+            Update the details for {app.name}
+          </p>
+        </div>
+
+        <Card className="bg-gradient-to-b from-background to-background/80 border-primary/10 hover:border-blue-500/30 transition-colors">
+          <CardHeader>
+            <CardTitle>App Details</CardTitle>
+            <CardDescription>
+              Make changes to your app&apos;s information
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Form app={app} />
+          </CardContent>
+        </Card>
+      </div>
+    </section>
+  )
 }

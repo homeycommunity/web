@@ -1,54 +1,104 @@
-"use client";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { App } from "@prisma/client";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+"use client"
 
-export const dynamic = 'force-dynamic';
-export function PageForm ({ app }: { app: App }) {
+import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { App } from "@prisma/client"
+import { Loader2 } from "lucide-react"
 
-  const [tarGz, setTarGz] = useState(null);
-  const router = useRouter();
-  const uploadToClient = (event: any) => {
+import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
+
+export const dynamic = "force-dynamic"
+export function PageForm({ app }: { app: App }) {
+  const [tarGz, setTarGz] = useState<File | null>(null)
+  const [isUploading, setIsUploading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
+  const router = useRouter()
+
+  const uploadToClient = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setError(null)
     if (event.target.files && event.target.files[0]) {
-      const i = event.target.files[0];
-
-      setTarGz(i);
+      const file = event.target.files[0]
+      if (!file.name.endsWith(".tar.gz")) {
+        setError("Please select a valid .tar.gz file")
+        return
+      }
+      setTarGz(file)
     } else {
-      setTarGz(null);
+      setTarGz(null)
     }
-  };
+  }
 
+  const uploadToServer = async (event: React.MouseEvent<HTMLButtonElement>) => {
+    event.preventDefault()
+    if (!tarGz) return
 
-  const uploadToServer = async (event: any) => {
-    const body = new FormData();
-    body.append('id', app.id);
-    body.append("file", tarGz!);
-    const response = await fetch("/api/control/apps/upload", {
-      method: "POST",
-      body
-    });
-    const data = await response.json();
-    if (data.status == 200) {
-      router.push('/control/apps')
+    setIsUploading(true)
+    setError(null)
+
+    try {
+      const body = new FormData()
+      body.append("id", app.id)
+      body.append("file", tarGz)
+
+      const response = await fetch("/api/control/apps/upload", {
+        method: "POST",
+        body,
+      })
+
+      const data = await response.json()
+
+      if (data.status === 200) {
+        router.push("/control/apps")
+      } else {
+        setError(data.message || "Upload failed. Please try again.")
+      }
+    } catch (err) {
+      setError("An error occurred while uploading. Please try again.")
+    } finally {
+      setIsUploading(false)
     }
-  };
-
+  }
 
   return (
-    <section className="container grid items-center gap-6 pb-8 pt-6 md:py-10">
-      <div className="flex max-w-[980px] flex-col items-start gap-2">
-        <h1 className="text-3xl font-extrabold leading-tight tracking-tighter md:text-4xl">Select Image</h1>
-        <Input type="file" name="myImage" accept="application/gzip" onChange={uploadToClient} />
-        <Button
-          disabled={!tarGz}
-          type="submit"
-          onClick={uploadToServer}
-        >
-          Send to server
-        </Button>
+    <form className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="app-file">App Package (.tar.gz)</Label>
+        <div className="flex flex-col gap-4">
+          <Input
+            id="app-file"
+            type="file"
+            name="appPackage"
+            accept=".tar.gz"
+            onChange={uploadToClient}
+            className="cursor-pointer"
+          />
+          {tarGz && (
+            <p className="text-sm text-muted-foreground">
+              Selected file: {tarGz.name}
+            </p>
+          )}
+          {error && <p className="text-sm text-destructive">{error}</p>}
+        </div>
       </div>
-    </section>
-  );
+
+      <Button
+        disabled={!tarGz || isUploading}
+        type="submit"
+        onClick={uploadToServer}
+        variant="blue"
+        className="w-full sm:w-auto bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 transition-all"
+      >
+        {isUploading ? (
+          <>
+            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            Uploading...
+          </>
+        ) : (
+          "Upload Package"
+        )}
+      </Button>
+    </form>
+  )
 }

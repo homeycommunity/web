@@ -30,7 +30,7 @@ export async function POST(req: NextRequest) {
       Authorization: auth,
     },
   })
-
+  console.log(data)
   const user: string = data.data?.sub
   if (!user) {
     return new Response("{}", {
@@ -128,6 +128,8 @@ export async function POST(req: NextRequest) {
       userId: userObj.id,
     },
   })
+
+  console.log("done")
 
   return new Response("{}", {
     headers: {

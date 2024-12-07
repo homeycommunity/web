@@ -6,10 +6,11 @@ import { StoreIdentifierView } from "@/app/store/[identifier]/view"
 export const dynamic = "force-dynamic"
 
 export default async function StorePage({
-  params,
+  params: paramsPromise,
 }: {
-  params: { identifier: string }
+  params: Promise<{ identifier: string }>
 }) {
+  const params = await paramsPromise
   const prisma = new PrismaClient()
   const session = await auth()
   let homeys: Homey[] = []
