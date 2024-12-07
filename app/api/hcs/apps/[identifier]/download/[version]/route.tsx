@@ -19,9 +19,12 @@ export const dynamic = "force-dynamic"
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { identifier: string; version: string } },
+  {
+    params: paramsPromise,
+  }: { params: Promise<{ identifier: string; version: string }> },
   res: NextResponse
 ) {
+  const params = await paramsPromise
   const auth = req.headers.get("authorization")
   if (!auth) {
     return new Response("{}", {
