@@ -16,7 +16,7 @@ export const dynamic = "force-dynamic"
 export default async function ControlAppsManagePage({
   params,
 }: {
-  params: { identifier: string }
+  params: Promise<{ identifier: string }>
 }) {
   const { identifier } = await params
 

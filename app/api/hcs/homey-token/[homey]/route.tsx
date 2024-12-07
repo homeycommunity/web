@@ -16,8 +16,9 @@ export const dynamic = "force-dynamic"
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { homey: string } }
+  { params: paramsPromise }: { params: Promise<{ homey: string }> }
 ) {
+  const params = await paramsPromise
   const auth = req.headers.get("authorization")
   if (!auth) {
     return new Response("{}", {

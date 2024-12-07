@@ -1,13 +1,16 @@
+import { NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
 import { connect } from "emitter-io"
-import { NextResponse } from "next/server"
 
 export const dynamic = "force-dynamic"
 export async function POST(
   request: Request,
-  { params }: { params: { identifier: string; homey: string } }
+  {
+    params: paramsPromise,
+  }: { params: Promise<{ identifier: string; homey: string }> }
 ) {
+  const params = await paramsPromise
   const session = await auth()
   const url = new URL(request.url)
   const version = url.searchParams.get("version")

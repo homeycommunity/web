@@ -16,7 +16,7 @@ export async function OPTIONS(req: NextRequest) {
 export const dynamic = "force-dynamic"
 export async function GET(
   req: NextRequest,
-  { params }: { params: { identifier: string } }
+  { params }: { params: Promise<{ identifier: string }> }
 ) {
   const auth = req.headers.get("authorization")
   if (!auth) {
@@ -61,7 +61,7 @@ export async function GET(
     })
   }
 
-  const { identifier } = params
+  const { identifier } = await params
 
   const app = await prisma.app.findFirst({
     where: {
