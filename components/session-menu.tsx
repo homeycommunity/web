@@ -1,33 +1,53 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { User } from "lucide-react"
 
+import Logout from "./logout"
+import { buttonVariants } from "./ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
+} from "./ui/dropdown-menu"
 
-import Logout from "./logout"
+interface SessionMenuProps {
+  session: {
+    name?: string | null
+  }
+}
 
-export const SessionMenu = (props: any) => {
+export const SessionMenu = ({ session }: SessionMenuProps) => {
   const router = useRouter()
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger>
-        {props.session?.name || "No name"}
+      <DropdownMenuTrigger
+        className={buttonVariants({
+          size: "sm",
+          variant: "ghost",
+          className:
+            "rounded-full text-sm font-medium hover:bg-primary/10 transition-colors h-10 px-3 gap-3",
+        })}
+      >
+        <User className="h-6 w-6" />
+        <span className="hidden sm:inline-block max-w-[100px] truncate">
+          {session?.name || "Account"}
+        </span>
       </DropdownMenuTrigger>
-      <DropdownMenuContent>
+      <DropdownMenuContent
+        align="end"
+        className="w-48 mt-2 rounded-xl border border-primary/10 bg-primary/5 backdrop-blur-lg"
+        sideOffset={8}
+      >
         <DropdownMenuItem
-          onClick={() => {
-            router.push("/control/apps")
-          }}
+          onClick={() => router.push("/control/apps")}
+          className="cursor-pointer rounded-lg hover:bg-primary/10 transition-colors py-2.5 px-3"
         >
           My Apps
         </DropdownMenuItem>
-        <DropdownMenuSeparator />
+        <DropdownMenuSeparator className="bg-primary/10" />
         <Logout />
       </DropdownMenuContent>
     </DropdownMenu>

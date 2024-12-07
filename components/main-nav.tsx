@@ -20,21 +20,27 @@ interface MainNavProps {
 
 export function MainNav({ items }: MainNavProps) {
   return (
-    <div className="flex gap-6 md:gap-10">
+    <div className="flex gap-4 md:gap-8">
       <Link href="/" className="flex items-center space-x-2">
-        <Icons.logo className="h-6 w-6" />
-        <span className="inline-block font-bold">{siteConfig.name}</span>
+        <Icons.logo className="h-8 w-8" />
+        <span className="hidden xxs:inline-block font-bold">
+          {siteConfig.name}
+        </span>
       </Link>
 
       {/* Mobile Navigation */}
       {items?.length ? (
-        <div className="md:hidden">
+        <div className="md:hidden relative">
           <DropdownMenu>
-            <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-md border border-input bg-background p-2.5">
-              <Menu className="h-5 w-5" />
+            <DropdownMenuTrigger className="flex h-10 w-10 items-center justify-center rounded-full border border-primary/10 bg-primary/5 backdrop-blur-sm supports-[backdrop-filter]:bg-background/60 hover:bg-primary/10 transition-colors">
+              <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle menu</span>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px]">
+            <DropdownMenuContent
+              align="end"
+              className="mt-2 w-[180px] rounded-xl border border-primary/10 bg-primary/5 backdrop-blur-lg"
+              sideOffset={8}
+            >
               {items.map(
                 (item, index) =>
                   item.href && (
@@ -43,7 +49,7 @@ export function MainNav({ items }: MainNavProps) {
                         href={item.href}
                         target={item.target}
                         className={cn(
-                          "w-full",
+                          "w-full text-sm py-2.5 px-3 hover:bg-primary/10 transition-colors rounded-lg",
                           item.disabled && "cursor-not-allowed opacity-80"
                         )}
                       >
@@ -68,7 +74,7 @@ export function MainNav({ items }: MainNavProps) {
                   href={item.href}
                   target={item.target}
                   className={cn(
-                    "flex items-center text-sm font-medium text-muted-foreground",
+                    "flex items-center text-sm font-medium text-muted-foreground hover:text-foreground transition-colors rounded-lg px-3 py-2 hover:bg-primary/5",
                     item.disabled && "cursor-not-allowed opacity-80"
                   )}
                 >
