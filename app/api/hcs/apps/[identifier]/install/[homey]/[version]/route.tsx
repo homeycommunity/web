@@ -1,10 +1,8 @@
-import { Readable } from "stream"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
 import { Client } from "minio"
 
-import { getEnv } from "@/lib/get-env"
 import { stream2buffer } from "@/lib/stream2buffer"
 import { decryptToken } from "@/lib/token-encryption"
 
@@ -117,15 +115,13 @@ export async function GET(
 
   const file = await minioClient.getObject("apps", app.versions[0].file)
   const buffer = await stream2buffer(file)
-  const env = await getEnv(Readable.from(buffer))
+  //const env = await getEnv(Readable.from(buffer))
   const form = new FormData()
   form.append("app", new Blob([buffer]), identifier + "-" + version + ".tar.gz")
   form.append("debug", "false")
-  if (env) {
-    form.append("env", env)
-  } else {
-    form.append("env", "{}")
-  }
+
+  form.append("env", "{}")
+
   form.append("purgeSettings", "false")
 
   const bearerToken = await decryptToken(
