@@ -114,6 +114,8 @@ model AppVersion {
   changelog    String?  @db.Text
   approved     Boolean
   available    Boolean
+  env          String?  @db.Text
+  appinfo      Json?    @map("app_info")
   publishedAt  DateTime @map("published_at")
   app          App      @relation(fields: [appId], references: [id], onDelete: Cascade)
 

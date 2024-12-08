@@ -52,9 +52,17 @@ export async function POST(req: Request) {
     const fileBlob = Buffer.from(await bodyFile.arrayBuffer())
     const archive = Readable.from(fileBlob)
     const tarFile = bodyFile.name.replace(/\.tar\.gz$/, "")
-    const z = await tarGzGlob(archive, ["./app.json", "app.json"])
+    const z = await tarGzGlob(archive, [
+      "./app.json",
+      "app.json",
+      "./env.json",
+      "env.json",
+    ])
     const appInfo = JSON.parse(
       z.get("app.json")! || z.get("./app.json")! || "{}"
+    )
+    const envInfo = JSON.parse(
+      z.get("env.json")! || z.get("./env.json")! || "{}"
     )
     if (!appInfo?.id || !appInfo?.version) {
       return NextResponse.json(
@@ -102,6 +110,8 @@ export async function POST(req: Request) {
         file: filename,
         available: true,
         experimental: true,
+        env: envInfo,
+        appinfo: appInfo,
         appId: app,
         approved: false,
         publishedAt: new Date(),
