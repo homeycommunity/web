@@ -145,5 +145,5 @@ export async function GET(
       console.log(err)
     })
 
-  return NextResponse.json(postResponse)
+  return new Response(postResponse)
 }
