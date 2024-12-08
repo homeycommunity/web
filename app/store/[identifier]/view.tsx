@@ -100,7 +100,7 @@ export function StoreIdentifierView({
                       <Download className="mr-2 h-4 w-4" />
                       Install on {homey.name} via HCS App
                     </Button>
-                    <Button
+                    {/* <Button
                       variant="blue"
                       onClick={() => {
                         fetch(
@@ -114,7 +114,7 @@ export function StoreIdentifierView({
                       }}
                     >
                       Install on {homey.name} Directly
-                    </Button>
+                    </Button> */}
                   </>
                 ))}
               </div>
