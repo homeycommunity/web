@@ -55,7 +55,7 @@ export async function GET(request: Request) {
       const homeysWithoutRemoteUrl = await prisma.homey.findMany({
         where: {
           userId: token.userId,
-          remoteUrl: "",
+          OR: [{ remoteUrl: "" }, { remoteUrl: null }],
         },
       })
 
