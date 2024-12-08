@@ -115,6 +115,8 @@ export async function POST(req: NextRequest) {
           data: {
             name: homey.name,
             remoteUrl: homey.remoteUrl,
+            localUrl: homey.localUrl,
+            remoteForwardedUrl: homey.remoteUrlForwarded,
           },
         })
       }

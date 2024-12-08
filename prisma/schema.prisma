@@ -68,15 +68,16 @@ model HomeyToken {
 }
 
 model Homey {
-  id           String  @id @default(cuid())
-  homeyId      String  @map("homey_id")
-  name         String?
-  remoteUrl    String? @map("remote_url") @db.Text
-  localUrl     String? @map("local_url") @db.Text
-  User         User?   @relation(fields: [userId], references: [id])
-  userId       String? @map("user_id")
-  eventKey     String? @map("event_key")
-  sessionToken String? @map("session_token") @db.Text
+  id                 String  @id @default(cuid())
+  homeyId            String  @map("homey_id")
+  name               String?
+  remoteUrl          String? @map("remote_url") @db.Text
+  localUrl           String? @map("local_url") @db.Text
+  remoteForwardedUrl String? @map("remote_forwarded_url") @db.Text
+  User               User?   @relation(fields: [userId], references: [id])
+  userId             String? @map("user_id")
+  eventKey           String? @map("event_key")
+  sessionToken       String? @map("session_token") @db.Text
 
   @@unique([homeyId, userId])
   @@map("homey")

@@ -65,7 +65,13 @@ export async function GET(request: Request) {
       })
 
       const homeysWithoutRemoteUrl = homeysOfUser.filter(
-        (homey) => homey.remoteUrl === "" || homey.remoteUrl === null
+        (homey) =>
+          homey.remoteUrl === "" ||
+          homey.remoteUrl === null ||
+          homey.localUrl === "" ||
+          homey.localUrl === null ||
+          homey.remoteForwardedUrl === "" ||
+          homey.remoteForwardedUrl === null
       )
 
       for (const newHomey of me.data.homeys) {
@@ -80,6 +86,8 @@ export async function GET(request: Request) {
             },
             data: {
               remoteUrl: newHomey.remoteUrl,
+              localUrl: newHomey.localUrlSecure,
+              remoteForwardedUrl: newHomey.remoteUrlForwarded,
             },
           })
         }
