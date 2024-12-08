@@ -116,7 +116,7 @@ export async function GET(
 
   const file = await minioClient.getObject("apps", app.versions[0].file)
   const buffer = await stream2buffer(file)
-  const env = await getEnv(buffer)
+  const env = await getEnv(file)
   const form = new FormData()
   form.append("app", new Blob([buffer]), identifier + "-" + version + ".tar.gz")
   form.append("debug", "false")
