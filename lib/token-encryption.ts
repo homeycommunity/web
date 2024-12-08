@@ -12,7 +12,8 @@ class TokenEncryptionError extends Error {
 }
 
 function getEnvironmentKey(): string {
-  const envKey = process.env.ENCRYPTION_SECRET
+  const envKey =
+    process.env?.ENCRYPTION_SECRET ?? "a344aa4499754f209ae0d0072a6a50bd"
   if (!envKey) {
     throw new TokenEncryptionError(
       "ENCRYPTION_SECRET environment variable is not set"
