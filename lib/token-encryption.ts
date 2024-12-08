@@ -48,7 +48,7 @@ export function encryptToken(token: string, userKey: string): string {
       throw new Error("Token and encryption key are required")
     }
 
-    if (userKey.length !== 64) {
+    if (userKey.length !== 32) {
       throw new Error("Invalid encryption key length")
     }
 
