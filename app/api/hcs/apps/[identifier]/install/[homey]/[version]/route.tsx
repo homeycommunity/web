@@ -136,11 +136,11 @@ export async function GET(
     },
   })
     .then((e) => {
-      return e.json()
+      return e.text()
     })
     .catch((err) => {
       console.log(err)
     })
 
-  return new Response(postResponse)
+  return new Response(postResponse as string)
 }
