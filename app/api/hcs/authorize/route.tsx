@@ -4,15 +4,18 @@ import axios from "axios"
 import { connect } from "emitter-io"
 
 import { userInfoUrl } from "@/config/user-info"
+import { encryptToken, generateEncryptionKey } from "@/lib/token-encryption"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 }
+
 export async function OPTIONS(req: NextRequest) {
   return NextResponse.json({}, { headers: corsHeaders })
 }
+
 export const dynamic = "force-dynamic"
 
 export async function POST(req: NextRequest) {
@@ -25,6 +28,7 @@ export async function POST(req: NextRequest) {
       },
     })
   }
+
   const data = await axios.get(userInfoUrl(), {
     headers: {
       Authorization: auth,
@@ -40,6 +44,7 @@ export async function POST(req: NextRequest) {
       },
     })
   }
+
   const prisma = new PrismaClient()
   const userFromAccount = await prisma.account.findFirst({
     where: {
@@ -49,6 +54,7 @@ export async function POST(req: NextRequest) {
       user: true,
     },
   })
+
   if (!userFromAccount) {
     return new Response("{}", {
       headers: {
@@ -57,6 +63,7 @@ export async function POST(req: NextRequest) {
       },
     })
   }
+
   const userObj = userFromAccount.user
   const input = await req.json()
 
@@ -112,20 +119,43 @@ export async function POST(req: NextRequest) {
     })
   )
 
+  // Generate or get existing encryption key
+  const existingToken = await prisma.homeyToken.findUnique({
+    where: {
+      userId: userObj.id,
+    },
+    select: {
+      encryptionKey: true,
+    },
+  })
+
+  const encryptionKey = existingToken?.encryptionKey || generateEncryptionKey()
+
+  // Encrypt tokens
+  const encryptedAccessToken = encryptToken(
+    input.token.access_token,
+    encryptionKey
+  )
+  const encryptedRefreshToken = input.token.refresh_token
+    ? encryptToken(input.token.refresh_token, encryptionKey)
+    : null
+
   await prisma.homeyToken.upsert({
     where: {
       userId: userObj.id,
     },
     update: {
-      accessToken: input.token.access_token,
-      refreshToken: input.token.refresh_token,
+      accessToken: encryptedAccessToken,
+      refreshToken: encryptedRefreshToken,
       expires: input.token.expires_at,
+      encryptionKey: encryptionKey,
     },
     create: {
-      accessToken: input.token.access_token,
-      refreshToken: input.token.refresh_token,
+      accessToken: encryptedAccessToken,
+      refreshToken: encryptedRefreshToken,
       expires: input.token.expires_at,
       userId: userObj.id,
+      encryptionKey: encryptionKey,
     },
   })
 

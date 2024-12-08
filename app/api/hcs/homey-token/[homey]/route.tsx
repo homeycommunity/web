@@ -3,15 +3,18 @@ import { PrismaClient } from "@prisma/client"
 import axios from "axios"
 
 import { userInfoUrl } from "@/config/user-info"
+import { decryptToken } from "@/lib/token-encryption"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 }
+
 export async function OPTIONS(req: NextRequest) {
   return NextResponse.json({}, { headers: corsHeaders })
 }
+
 export const dynamic = "force-dynamic"
 
 export async function GET(
@@ -72,7 +75,7 @@ export async function GET(
       homeyId: params.homey,
     },
   })
-  if (!token) {
+  if (!token || !token.encryptionKey) {
     return new Response("{}", {
       headers: {
         "Content-Type": "application/json",
@@ -80,16 +83,32 @@ export async function GET(
       },
     })
   }
-  return new Response(
-    JSON.stringify({
-      token: token.accessToken,
-      eventKey: homey?.eventKey,
-    }),
-    {
+
+  try {
+    const decryptedAccessToken = decryptToken(
+      token.accessToken,
+      token.encryptionKey
+    )
+
+    return new Response(
+      JSON.stringify({
+        token: decryptedAccessToken,
+        eventKey: homey?.eventKey,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      }
+    )
+  } catch (error) {
+    console.error("Failed to decrypt token:", error)
+    return new Response("{}", {
       headers: {
         "Content-Type": "application/json",
         ...corsHeaders,
       },
-    }
-  )
+    })
+  }
 }
