@@ -73,32 +73,49 @@ export function StoreIdentifierView({
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 {homeys.map((homey) => (
-                  <Button
-                    key={homey.id}
-                    variant="blue"
-                    onClick={() => {
-                      fetch(
-                        "/store/" +
-                          app.identifier +
-                          "/install/" +
-                          homey.id +
-                          "?version=" +
-                          app.versions[0].version,
-                        {
-                          method: "POST",
-                        }
-                      ).then(() => {
-                        toast.info("App installed", {
-                          description:
-                            "The app has been installed on your Homey",
+                  <>
+                    <Button
+                      key={homey.id}
+                      variant="blue"
+                      onClick={() => {
+                        fetch(
+                          "/store/" +
+                            app.identifier +
+                            "/install/" +
+                            homey.id +
+                            "?version=" +
+                            app.versions[0].version,
+                          {
+                            method: "POST",
+                          }
+                        ).then(() => {
+                          toast.info("App installed", {
+                            description:
+                              "The app has been installed on your Homey",
+                          })
                         })
-                      })
-                    }}
-                    className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 transition-all"
-                  >
-                    <Download className="mr-2 h-4 w-4" />
-                    Install on {homey.name}
-                  </Button>
+                      }}
+                      className="bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 transition-all"
+                    >
+                      <Download className="mr-2 h-4 w-4" />
+                      Install on {homey.name} via HCS App
+                    </Button>
+                    <Button
+                      variant="blue"
+                      onClick={() => {
+                        fetch(
+                          "/api/hcs/apps/" +
+                            app.identifier +
+                            "/install/" +
+                            homey.id +
+                            "/" +
+                            app.versions[0].version
+                        )
+                      }}
+                    >
+                      Install on {homey.name} Directly
+                    </Button>
+                  </>
                 ))}
               </div>
             </CardContent>
