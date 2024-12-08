@@ -64,6 +64,7 @@ export async function POST(req: Request) {
     const envInfo = JSON.parse(
       z.get("env.json")! || z.get("./env.json")! || "{}"
     )
+    console.log(appInfo, envInfo)
     if (!appInfo?.id || !appInfo?.version) {
       return NextResponse.json(
         {
@@ -110,7 +111,7 @@ export async function POST(req: Request) {
         file: filename,
         available: true,
         experimental: true,
-        env: envInfo,
+        env: JSON.stringify(envInfo),
         appinfo: appInfo,
         appId: app,
         approved: false,
