@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
+import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
-import axios from "axios"
 import { Client } from "minio"
 
-import { userInfoUrl } from "@/config/user-info"
 import { getEnv } from "@/lib/get-env"
 import { stream2buffer } from "@/lib/stream2buffer"
 import { decryptToken } from "@/lib/token-encryption"
@@ -29,23 +28,8 @@ export async function GET(
   res: NextResponse
 ) {
   const params = await paramsPromise
-  const auth = req.headers.get("authorization")
-  if (!auth) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-  const data = await axios.get(userInfoUrl(), {
-    headers: {
-      Authorization: auth,
-    },
-  })
-
-  const user: string = data.data?.sub
-  if (!user) {
+  const session = await auth()
+  if (!session || !session.user) {
     return new Response("{}", {
       headers: {
         "Content-Type": "application/json",
@@ -55,26 +39,27 @@ export async function GET(
   }
 
   const prisma = new PrismaClient()
-  const userFromAccount = await prisma.account.findFirst({
+  const user = await prisma.user.findUnique({
     where: {
-      providerAccountId: user,
-    },
-    include: {
-      user: true,
+      email: session.user.email!,
     },
   })
-  if (!userFromAccount) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
+
+  if (!user) {
+    return NextResponse.json(
+      {
+        status: 401,
+        message: "Unauthorized",
       },
-    })
+      {
+        status: 401,
+      }
+    )
   }
 
   const token = await prisma.homeyToken.findFirst({
     where: {
-      userId: userFromAccount.userId,
+      userId: user.id,
     },
   })
 
