@@ -52,20 +52,21 @@ export async function GET(request: Request) {
           expires: new Date(Date.now() + data.data.expires_in * 1000 - 1000),
         },
       })
-      const homeysWithoutRemoteUrl = await prisma.homey.findMany({
+      const homeysOfUser = await prisma.homey.findMany({
         where: {
           userId: token.userId,
-          OR: [{ remoteUrl: "" }, { remoteUrl: null }],
         },
       })
-
-      console.log(homeysWithoutRemoteUrl)
 
       const me = await axios.get(`https://api.athom.com/user/me`, {
         headers: {
           Authorization: `Bearer ${accessToken}`,
         },
       })
+
+      const homeysWithoutRemoteUrl = homeysOfUser.filter(
+        (homey) => homey.remoteUrl === "" || homey.remoteUrl === null
+      )
 
       for (const newHomey of me.data.homeys) {
         const homey = homeysWithoutRemoteUrl.find(
@@ -83,12 +84,6 @@ export async function GET(request: Request) {
           })
         }
       }
-
-      const homeysOfUser = await prisma.homey.findMany({
-        where: {
-          userId: token.userId,
-        },
-      })
 
       await Promise.all(
         homeysOfUser.map(async (homey) => {
