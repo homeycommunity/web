@@ -1,7 +1,11 @@
 import { PrismaClient } from "@prisma/client"
 import axios from "axios"
 
-import { decryptToken, encryptToken } from "@/lib/token-encryption"
+import {
+  decryptToken,
+  encryptToken,
+  generateEncryptionKey,
+} from "@/lib/token-encryption"
 
 export const dynamic = "force-dynamic"
 export async function GET(request: Request) {
@@ -23,7 +27,7 @@ export async function GET(request: Request) {
       a.set("client_secret", process.env.HOMEY_CLIENT_SECRET!)
       a.set("grant_type", "refresh_token")
       a.set("refresh_token", decryptedRefreshToken!)
-
+      const newEncryptionKey = generateEncryptionKey()
       const data = await axios.post(
         "https://api.athom.com/oauth2/token",
         a.toString()
@@ -33,14 +37,12 @@ export async function GET(request: Request) {
           id: token.id,
         },
         data: {
-          accessToken: encryptToken(
-            data.data.access_token,
-            token.encryptionKey!
-          ),
+          accessToken: encryptToken(data.data.access_token, newEncryptionKey!),
           refreshToken: encryptToken(
             data.data.refresh_token,
-            token.encryptionKey!
+            newEncryptionKey!
           ),
+          encryptionKey: newEncryptionKey,
           expires: new Date(Date.now() + data.data.expires_in * 1000 - 1000),
         },
       })
