@@ -1,3 +1,4 @@
+import { Readable } from "stream"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
@@ -116,7 +117,7 @@ export async function GET(
 
   const file = await minioClient.getObject("apps", app.versions[0].file)
   const buffer = await stream2buffer(file)
-  const env = await getEnv(file)
+  const env = await getEnv(Readable.from(buffer))
   const form = new FormData()
   form.append("app", new Blob([buffer]), identifier + "-" + version + ".tar.gz")
   form.append("debug", "false")
