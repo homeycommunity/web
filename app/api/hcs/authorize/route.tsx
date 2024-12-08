@@ -4,6 +4,7 @@ import axios from "axios"
 import { connect } from "emitter-io"
 
 import { userInfoUrl } from "@/config/user-info"
+import { getSessionTokenFromAccessToken } from "@/lib/session-token"
 import { encryptToken, generateEncryptionKey } from "@/lib/token-encryption"
 
 const corsHeaders = {
@@ -34,7 +35,6 @@ export async function POST(req: NextRequest) {
       Authorization: auth,
     },
   })
-  console.log(data)
   const user: string = data.data?.sub
   if (!user) {
     return new Response("{}", {
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
   const userObj = userFromAccount.user
   const input = await req.json()
-
+  console.log(input)
   await Promise.all(
     input.homey.map(async (homey: any) => {
       const homeyInDB = await prisma.homey.findFirst({
@@ -90,6 +90,7 @@ export async function POST(req: NextRequest) {
                   homeyId: homey.id,
                   userId: userObj.id,
                   eventKey: id.key,
+                  remoteUrl: homey.remoteUrl,
                 },
               })
               emitter.off("keygen", call)
@@ -113,6 +114,7 @@ export async function POST(req: NextRequest) {
           },
           data: {
             name: homey.name,
+            remoteUrl: homey.remoteUrl,
           },
         })
       }
@@ -159,7 +161,29 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  console.log("done")
+  const homeys = await prisma.homey.findMany({
+    where: {
+      userId: userObj.id,
+    },
+  })
+
+  await Promise.all(
+    homeys.map(async (homey) => {
+      const sessionToken = await getSessionTokenFromAccessToken(
+        input.token.access_token,
+        homey.remoteUrl!
+      )
+
+      await prisma.homey.update({
+        where: {
+          id: homey.id,
+        },
+        data: {
+          sessionToken: encryptToken(sessionToken, encryptionKey),
+        },
+      })
+    })
+  )
 
   return new Response("{}", {
     headers: {

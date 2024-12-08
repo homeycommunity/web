@@ -1,4 +1,3 @@
-import console from "console"
 import { NextRequest, NextResponse } from "next/server"
 import { auth } from "@/auth"
 import { PrismaClient } from "@prisma/client"
@@ -54,16 +53,13 @@ export async function GET(
     },
   })
 
-  const accessToken = decryptToken(token?.accessToken!, token?.encryptionKey!)
-  console.log(accessToken)
-  const apps = await axios.get(
-    `https://${homey?.homeyId}.homey.athom-prod-euwest1-001.homeypro.net/api/manager/apps/app`,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  )
+  const sessionToken = decryptToken(homey?.sessionToken!, token?.encryptionKey!)
+
+  const apps = await axios.get(`${homey?.remoteUrl}/api/manager/apps/app`, {
+    headers: {
+      Authorization: `Bearer ${sessionToken}`,
+    },
+  })
 
   return NextResponse.json(apps.data)
 }
