@@ -2,6 +2,7 @@ import Link from "next/link"
 import { PrismaClient } from "@prisma/client"
 import { AlertCircle, ExternalLink, Package, Tag } from "lucide-react"
 
+import { AppInfo } from "@/types/app"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import {
@@ -43,56 +44,60 @@ export default async function StorePage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {apps.map((app) => (
-            <Card
-              key={app.identifier}
-              className="group bg-gradient-to-b from-background to-background/80 border-primary/10 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5"
-            >
-              <CardHeader className="space-y-4">
-                <div className="flex items-start justify-between">
-                  <div className="flex items-center space-x-2">
-                    <Package className="w-5 h-5 text-blue-500" />
-                    <CardTitle className="text-xl">{app.name}</CardTitle>
+          {apps.map((app) => {
+            const latestVersion = app.versions[app.versions.length - 1]
+            const appInfo = latestVersion.appinfo as unknown as AppInfo
+
+            return (
+              <Card
+                key={app.identifier}
+                className="group bg-gradient-to-b from-background to-background/80 border-primary/10 hover:border-blue-500/30 transition-all duration-300 hover:shadow-lg hover:shadow-blue-500/5"
+              >
+                <CardHeader className="space-y-4">
+                  <div className="flex items-start justify-between">
+                    <div className="flex items-center space-x-2">
+                      <Package className="w-5 h-5 text-blue-500" />
+                      <CardTitle className="text-xl">{app.name}</CardTitle>
+                    </div>
+                    {latestVersion.experimental && (
+                      <Badge
+                        variant="destructive"
+                        className="flex items-center gap-1"
+                      >
+                        <AlertCircle className="w-3 h-3" />
+                        experimental
+                      </Badge>
+                    )}
                   </div>
-                  {app.versions[app.versions.length - 1]?.experimental && (
-                    <Badge
-                      variant="destructive"
-                      className="flex items-center gap-1"
-                    >
-                      <AlertCircle className="w-3 h-3" />
-                      experimental
+                  {app.versions.length > 0 && (
+                    <Badge variant="secondary" className="w-fit">
+                      <Tag className="w-3 h-3 mr-1" />v{latestVersion.version}
                     </Badge>
                   )}
-                </div>
-                {app.versions.length > 0 && (
-                  <Badge variant="secondary" className="w-fit">
-                    <Tag className="w-3 h-3 mr-1" />v
-                    {app.versions[app.versions.length - 1].version}
-                  </Badge>
-                )}
-              </CardHeader>
+                </CardHeader>
 
-              <CardContent>
-                <p className="text-muted-foreground line-clamp-3">
-                  {app.description}
-                </p>
-              </CardContent>
+                <CardContent>
+                  <p className="text-muted-foreground line-clamp-3">
+                    {app.description}
+                  </p>
+                </CardContent>
 
-              <CardFooter>
-                <Link href={"/store/" + app.identifier} className="w-full">
-                  <Button
-                    variant="blue"
-                    className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 transition-all"
-                  >
-                    <span className="flex items-center gap-2">
-                      View Details
-                      <ExternalLink className="w-4 h-4" />
-                    </span>
-                  </Button>
-                </Link>
-              </CardFooter>
-            </Card>
-          ))}
+                <CardFooter>
+                  <Link href={"/store/" + app.identifier} className="w-full">
+                    <Button
+                      variant="blue"
+                      className="w-full bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-600 transition-all"
+                    >
+                      <span className="flex items-center gap-2">
+                        View Details
+                        <ExternalLink className="w-4 h-4" />
+                      </span>
+                    </Button>
+                  </Link>
+                </CardFooter>
+              </Card>
+            )
+          })}
         </div>
       </div>
     </section>
