@@ -1,6 +1,15 @@
 import Link from "next/link"
 import { PrismaClient } from "@prisma/client"
-import { AlertCircle, ExternalLink, Package, Tag } from "lucide-react"
+import {
+  AlertCircle,
+  BellIcon,
+  Blocks,
+  ExternalLink,
+  Package,
+  Play,
+  Settings2,
+  Tag,
+} from "lucide-react"
 
 import { AppInfo } from "@/types/app"
 import { Badge } from "@/components/ui/badge"
@@ -70,9 +79,46 @@ export default async function StorePage() {
                     )}
                   </div>
                   {app.versions.length > 0 && (
-                    <Badge variant="secondary" className="w-fit">
-                      <Tag className="w-3 h-3 mr-1" />v{latestVersion.version}
-                    </Badge>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="secondary" className="w-fit">
+                        <Tag className="w-3 h-3 mr-1" />v{latestVersion.version}
+                      </Badge>
+
+                      <Badge
+                        variant="outline"
+                        className="w-fit"
+                        title="Number of triggers in the app"
+                      >
+                        <BellIcon className="w-3 h-3 mr-1" />
+                        {appInfo.flow?.triggers?.length || 0}
+                      </Badge>
+                      <Badge
+                        variant="outline"
+                        className="w-fit"
+                        title="Number of conditions in the app"
+                      >
+                        <Settings2 className="w-3 h-3 mr-1" />
+                        {appInfo.flow?.conditions?.length || 0}
+                      </Badge>
+
+                      <Badge
+                        variant="outline"
+                        className="w-fit"
+                        title="Number of actions in the app"
+                      >
+                        <Play className="w-3 h-3 mr-1" />
+                        {appInfo.flow?.actions?.length || 0}
+                      </Badge>
+
+                      <Badge
+                        variant="outline"
+                        className="w-fit"
+                        title="Number of devices in the app"
+                      >
+                        <Blocks className="w-3 h-3 mr-1" />
+                        {appInfo.drivers?.length || 0}
+                      </Badge>
+                    </div>
                   )}
                 </CardHeader>
 
