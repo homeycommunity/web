@@ -1,6 +1,9 @@
 import { type NextRequest } from "next/server"
 import { auth } from "@/auth"
+import { PrismaClient } from "@prisma/client"
+import axios from "axios"
 
+import { userInfoUrl } from "@/config/user-info"
 import { parseApiKey, validateApiKey } from "@/lib/api-key"
 
 export type AuthenticatedRequest = NextRequest & {
@@ -36,8 +39,41 @@ export async function withAuth<T>(
     return handler(req, context as T)
   }
 
+  const authString = request.headers.get("authorization")
+  if (authString) {
+    const data = await axios.get(userInfoUrl(), {
+      headers: {
+        Authorization: authString,
+      },
+    })
+    const user: string = data.data?.sub
+    if (user) {
+      const prisma = new PrismaClient()
+      const userFromAccount = await prisma.account.findFirst({
+        where: {
+          providerAccountId: user,
+        },
+        include: {
+          user: true,
+        },
+      })
+      if (userFromAccount) {
+        const req = request as AuthenticatedRequest
+
+        req.auth = {
+          user: {
+            id: userFromAccount.user.id,
+            email: userFromAccount.user.email,
+            name: userFromAccount.user.name,
+          },
+        }
+        return handler(req, context as T)
+      }
+    }
+  }
+
   // Try API key authentication
-  const apiKeyStr = parseApiKey(request.headers.get("authorization"))
+  const apiKeyStr = parseApiKey(authString)
   if (apiKeyStr) {
     const apiKey = await validateApiKey(apiKeyStr)
     if (apiKey?.user) {
