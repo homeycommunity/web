@@ -11,38 +11,20 @@ export async function PATCH(req: Request) {
     }
 
     const body = await req.json()
-    const { name, email } = body
+    const { name } = body
 
-    // Validate that email isn't already taken by another user
-    if (email) {
-      const existingUser = await prisma.user.findFirst({
-        where: {
-          email,
-          NOT: {
-            id: session.user.id,
-          },
-        },
-      })
-
-      if (existingUser) {
-        return Response.json({ error: "Email already in use" }, { status: 400 })
-      }
-    }
-
-    // Update the user profile
+    // Update only the name
     const updatedUser = await prisma.user.update({
       where: {
         id: session.user.id,
       },
       data: {
         name,
-        email,
       },
     })
 
     return Response.json({
       name: updatedUser.name,
-      email: updatedUser.email,
     })
   } catch (error) {
     console.error("[PROFILE_UPDATE]", error)

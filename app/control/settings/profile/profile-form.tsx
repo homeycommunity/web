@@ -21,7 +21,6 @@ import { Input } from "@/components/ui/input"
 
 const profileFormSchema = z.object({
   name: z.string().min(1, "Name is required"),
-  email: z.string().email("Invalid email address"),
 })
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>
@@ -36,7 +35,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
     resolver: zodResolver(profileFormSchema),
     defaultValues: {
       name: user.name || "",
-      email: user.email || "",
     },
   })
 
@@ -86,22 +84,17 @@ export function ProfileForm({ user }: ProfileFormProps) {
             </FormItem>
           )}
         />
-        <FormField
-          control={form.control}
-          name="email"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Email</FormLabel>
-              <FormControl>
-                <Input {...field} type="email" />
-              </FormControl>
-              <FormDescription>
-                Your email address is used for notifications and signing in
-              </FormDescription>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
+        <FormItem>
+          <FormLabel>Email</FormLabel>
+          <FormControl>
+            <Input value={user.email || ""} disabled className="bg-muted" />
+          </FormControl>
+          <FormDescription>
+            Your email address is managed by your authentication provider
+          </FormDescription>
+        </FormItem>
+
         <Button type="submit">Update profile</Button>
       </form>
     </Form>
