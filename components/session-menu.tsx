@@ -1,15 +1,13 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { Key, User } from "lucide-react"
+import { User, UserCog } from "lucide-react"
 
-import Logout from "./logout"
 import { buttonVariants } from "./ui/button"
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu"
 
@@ -41,21 +39,10 @@ export const SessionMenu = ({ session }: SessionMenuProps) => {
         className="w-48 mt-2 rounded-xl border border-primary/10 bg-primary/5 backdrop-blur-lg"
         sideOffset={8}
       >
-        <DropdownMenuItem
-          onClick={() => router.push("/control/apps")}
-          className="cursor-pointer rounded-lg hover:bg-primary/10 transition-colors py-2.5 px-3"
-        >
-          My Apps
+        <DropdownMenuItem>
+          <UserCog className="h-4 w-4" />
+          <span>Settings</span>
         </DropdownMenuItem>
-        <DropdownMenuItem
-          onClick={() => router.push("/control/settings/api-keys")}
-          className="cursor-pointer rounded-lg hover:bg-primary/10 transition-colors py-2.5 px-3"
-        >
-          <Key className="h-4 w-4 mr-2" />
-          API Keys
-        </DropdownMenuItem>
-        <DropdownMenuSeparator className="bg-primary/10" />
-        <Logout />
       </DropdownMenuContent>
     </DropdownMenu>
   )

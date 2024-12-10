@@ -17,16 +17,16 @@ export async function OPTIONS() {
 
 export const dynamic = "force-dynamic"
 
-type RouteContext = {
-  params: {
+interface RouteContext {
+  params: Promise<{
     identifier: string
-  }
+  }>
 }
 
 export const GET = requireAuth(
   requireScopes<RouteContext>(["read:apps"])(
-    async (request: AuthenticatedRequest, context: RouteContext) => {
-      const { identifier } = context.params
+    async (request: AuthenticatedRequest, { params }: RouteContext) => {
+      const { identifier } = await params
 
       const app = await prisma.app.findFirst({
         where: {
@@ -67,8 +67,8 @@ export const GET = requireAuth(
 // Add PUT handler for updating apps with write:apps scope
 export const PUT = requireAuth(
   requireScopes<RouteContext>(["write:apps"])(
-    async (request: AuthenticatedRequest, context: RouteContext) => {
-      const { identifier } = context.params
+    async (request: AuthenticatedRequest, { params }: RouteContext) => {
+      const { identifier } = await params
       const data = await request.json()
 
       try {
@@ -108,8 +108,8 @@ export const PUT = requireAuth(
 // Add DELETE handler with write:apps scope
 export const DELETE = requireAuth(
   requireScopes<RouteContext>(["write:apps"])(
-    async (request: AuthenticatedRequest, context: RouteContext) => {
-      const { identifier } = context.params
+    async (request: AuthenticatedRequest, { params }: RouteContext) => {
+      const { identifier } = await params
 
       try {
         await prisma.app.delete({

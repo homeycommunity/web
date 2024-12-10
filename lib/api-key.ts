@@ -69,7 +69,9 @@ export function hasRequiredScopes(
 }
 
 // Create middleware to require specific scopes
-export function requireScopes<T>(scopes: string[]) {
+export function requireScopes<T extends { params: Promise<unknown> }>(
+  scopes: string[]
+) {
   return (
     handler: (req: AuthenticatedRequest, context: T) => Promise<Response>
   ) => {

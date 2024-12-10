@@ -22,7 +22,7 @@ export function SuccessKeyDialog({ apiKey, onClose }: SuccessKeyDialogProps) {
         <DialogHeader>
           <DialogTitle>API Key Created</DialogTitle>
           <DialogDescription>
-            Copy your API key now. You won't be able to see it again.
+            Copy your API key now. You won&apos;t be able to see it again.
           </DialogDescription>
         </DialogHeader>
         <div className="p-4 mt-4 bg-muted/50 border rounded-lg break-all font-mono">

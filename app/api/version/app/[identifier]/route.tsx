@@ -10,17 +10,17 @@ export const fetchCache = "force-no-store"
 
 // Use Next.js route segment config typing
 type RouteContext = {
-  params: {
+  params: Promise<{
     identifier: string
-  }
+  }>
 }
 
 export const GET = requireAuth(
   requireScopes<RouteContext>(["read:versions"])(
-    async (request: AuthenticatedRequest, context: RouteContext) => {
+    async (request: AuthenticatedRequest, { params }: RouteContext) => {
       const apps = await prisma.app.findMany({
         where: {
-          identifier: context.params.identifier,
+          identifier: (await params).identifier,
           versions: {
             some: {},
           },
