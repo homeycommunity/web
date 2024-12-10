@@ -156,14 +156,14 @@ export function StoreIdentifierView({
           </div>
         )}
 
-        {(appInfo?.flow?.triggers.length > 0 ||
-          appInfo?.flow?.conditions.length > 0 ||
-          appInfo?.flow?.actions.length > 0) && (
+        {(appInfo?.flow?.triggers?.length > 0 ||
+          appInfo?.flow?.conditions?.length > 0 ||
+          appInfo?.flow?.actions?.length > 0) && (
           <div className="flex flex-col gap-6">
             <h2 className="text-2xl font-bold">Flows</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {appInfo?.flow?.triggers.length > 0 && (
+              {appInfo?.flow?.triggers?.length > 0 && (
                 <Card className="bg-gradient-to-b from-background to-background/80 border-primary/10">
                   <CardHeader>
                     <div className="flex items-center gap-2">
@@ -174,8 +174,8 @@ export function StoreIdentifierView({
                   </CardHeader>
                   <CardContent className="overflow-hidden">
                     <div className="flex flex-col gap-4 max-h-[500px] overflow-y-auto pr-4 scrollbar-thin scrollbar-track-background scrollbar-thumb-accent">
-                      {appInfo.flow.triggers
-                        .filter((trigger) =>
+                      {appInfo?.flow?.triggers
+                        ?.filter((trigger) =>
                           currentDriver?.id
                             ? trigger.args.find((arg) => arg.name === "device")
                                 ?.filter ===
@@ -229,7 +229,7 @@ export function StoreIdentifierView({
                 </Card>
               )}
 
-              {appInfo?.flow?.conditions.length > 0 && (
+              {appInfo?.flow?.conditions?.length > 0 && (
                 <Card className="bg-gradient-to-b from-background to-background/80 border-primary/10">
                   <CardHeader>
                     <div className="flex items-center gap-2">
@@ -298,7 +298,7 @@ export function StoreIdentifierView({
                 </Card>
               )}
 
-              {appInfo?.flow?.actions.length > 0 && (
+              {appInfo?.flow?.actions?.length > 0 && (
                 <Card className="bg-gradient-to-b from-background to-background/80 border-primary/10">
                   <CardHeader>
                     <div className="flex items-center gap-2">
