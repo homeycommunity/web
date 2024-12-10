@@ -130,7 +130,7 @@ export function StoreIdentifierView({
           <div className="flex flex-col gap-6">
             <h2 className="text-2xl font-bold">Devices</h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              {appInfo?.drivers.map((driver) => (
+              {appInfo?.drivers?.map((driver) => (
                 <Card
                   key={driver.id}
                   className={
@@ -210,7 +210,7 @@ export function StoreIdentifierView({
                                         {" "}
                                         -{" "}
                                         {arg.type === "device"
-                                          ? appInfo.drivers.find(
+                                          ? appInfo.drivers?.find(
                                               (e) =>
                                                 e.id ===
                                                 arg.filter?.split("=")[1]
@@ -279,7 +279,7 @@ export function StoreIdentifierView({
                                         {" "}
                                         -{" "}
                                         {arg.type === "device"
-                                          ? appInfo.drivers.find(
+                                          ? appInfo.drivers?.find(
                                               (e) =>
                                                 e.id ===
                                                 arg.filter?.split("=")[1]
@@ -347,7 +347,7 @@ export function StoreIdentifierView({
                                         {" "}
                                         -{" "}
                                         {arg.type === "device"
-                                          ? appInfo.drivers.find(
+                                          ? appInfo.drivers?.find(
                                               (e) =>
                                                 e.id ===
                                                 arg.filter?.split("=")[1]
