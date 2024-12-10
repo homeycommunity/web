@@ -185,7 +185,7 @@ export default async function DownloadPage() {
                   </ol>
                 </AccordionContent>
               </AccordionItem>
-              <AccordionItem value="macos-unidentified">
+              <AccordionItem value="macos-damaged">
                 <AccordionTrigger>
                   macOS says the app is damaged and can&apos;t be opened
                 </AccordionTrigger>
