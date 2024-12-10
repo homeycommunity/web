@@ -1,12 +1,19 @@
+"use client"
+
 import { zodResolver } from "@hookform/resolvers/zod"
+import { addDays, addHours, format } from "date-fns"
+import { CalendarIcon, Loader2 } from "lucide-react"
+import { useForm } from "react-hook-form"
+
 import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@radix-ui/react-popover"
-import { Button } from "components/ui/button"
-import { Calendar } from "components/ui/calendar"
-import { Checkbox } from "components/ui/checkbox"
+  API_SCOPES,
+  getAllRequiredScopes,
+  type ApiScope,
+} from "@/config/api-scopes"
+import { cn } from "@/lib/utils"
+import { Button } from "@/components/ui/button"
+import { Calendar } from "@/components/ui/calendar"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
   Dialog,
   DialogContent,
@@ -14,7 +21,7 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "components/ui/dialog"
+} from "@/components/ui/dialog"
 import {
   Form,
   FormControl,
@@ -23,20 +30,20 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "components/ui/form"
-import { Input } from "components/ui/input"
+} from "@/components/ui/form"
+import { Input } from "@/components/ui/input"
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "components/ui/select"
-import { API_SCOPES } from "config/api-scopes"
-import { addDays, addHours, format } from "date-fns"
-import { cn } from "lib/utils"
-import { CalendarIcon, Loader2 } from "lucide-react"
-import { useForm } from "react-hook-form"
+} from "@/components/ui/select"
 
 import { formSchema, FormValues } from "../types"
 
@@ -54,7 +61,7 @@ const EXPIRY_PRESETS = [
   { label: "90 days", value: "90d", getDate: () => addDays(new Date(), 90) },
   { label: "No expiry", value: "no-expiry", getDate: () => null },
   { label: "Custom", value: "custom", getDate: () => null },
-]
+] as const
 
 export function CreateKeyDialog({
   open,
@@ -96,6 +103,22 @@ export function CreateKeyDialog({
     }
   }
 
+  const handleScopeChange = (scope: ApiScope, checked: boolean) => {
+    const currentScopes: ApiScope[] = form.getValues("scopes") as ApiScope[]
+    let newScopes: ApiScope[]
+
+    if (checked) {
+      // Include the selected scope and its dependencies
+      newScopes = getAllRequiredScopes([...currentScopes, scope])
+    } else {
+      // Remove the scope, but keep other scopes and their dependencies
+      const remainingScopes = currentScopes.filter((s) => s !== scope)
+      newScopes = getAllRequiredScopes(remainingScopes)
+    }
+
+    form.setValue("scopes", newScopes)
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
@@ -126,7 +149,7 @@ export function CreateKeyDialog({
               <FormField
                 control={form.control}
                 name="scopes"
-                render={() => (
+                render={({ field }) => (
                   <FormItem>
                     <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
                       {API_SCOPES.map((scope) => (
@@ -134,39 +157,22 @@ export function CreateKeyDialog({
                           key={scope.value}
                           className="flex items-center space-x-2"
                         >
-                          <FormField
-                            control={form.control}
-                            name="scopes"
-                            render={({ field }) => (
-                              <FormItem className="flex flex-col gap-1">
-                                <div className="flex items-center space-x-2">
-                                  <FormControl>
-                                    <Checkbox
-                                      checked={field.value?.includes(
-                                        scope.value
-                                      )}
-                                      onCheckedChange={(checked) => {
-                                        const values = checked
-                                          ? [...field.value, scope.value]
-                                          : field.value?.filter(
-                                              (value) => value !== scope.value
-                                            )
-                                        field.onChange(values)
-                                      }}
-                                    />
-                                  </FormControl>
-                                  <div>
-                                    <FormLabel className="!mt-0 font-medium">
-                                      {scope.label}
-                                    </FormLabel>
-                                    <FormDescription>
-                                      {scope.description}
-                                    </FormDescription>
-                                  </div>
-                                </div>
-                              </FormItem>
-                            )}
-                          />
+                          <FormControl>
+                            <Checkbox
+                              checked={field.value?.includes(scope.value)}
+                              onCheckedChange={(checked) => {
+                                handleScopeChange(scope.value, !!checked)
+                              }}
+                            />
+                          </FormControl>
+                          <div>
+                            <FormLabel className="!mt-0 font-medium">
+                              {scope.label}
+                            </FormLabel>
+                            <FormDescription>
+                              {scope.description}
+                            </FormDescription>
+                          </div>
                         </div>
                       ))}
                     </div>
@@ -204,7 +210,6 @@ export function CreateKeyDialog({
                           ))}
                         </SelectContent>
                       </Select>
-
                       {field.value === "custom" && (
                         <FormField
                           control={form.control}
@@ -235,9 +240,11 @@ export function CreateKeyDialog({
                                   >
                                     <Calendar
                                       mode="single"
-                                      selected={field.value as Date}
+                                      selected={field.value || undefined}
                                       onSelect={field.onChange}
-                                      disabled={(date) => date < new Date()}
+                                      disabled={(date: Date) =>
+                                        date < new Date()
+                                      }
                                       initialFocus
                                     />
                                   </PopoverContent>
