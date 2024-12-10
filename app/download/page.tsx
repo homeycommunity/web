@@ -2,6 +2,12 @@ import { Octokit } from "@octokit/rest"
 import { Apple, Computer, Download, Globe, Shield, Zap } from "lucide-react"
 
 import { siteConfig } from "@/config/site"
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
@@ -134,9 +140,111 @@ export default async function DownloadPage() {
         </Card>
       </div>
 
-      <div className="mt-16 text-center">
+      <div className="mt-16 mb-16">
+        <h2 className="text-2xl font-bold text-center mb-8">Troubleshooting</h2>
+        <Card className="bg-gradient-to-b from-background to-background/80 border-primary/10">
+          <CardContent className="p-6">
+            <Accordion type="single" collapsible>
+              <AccordionItem value="install-blocked">
+                <AccordionTrigger>
+                  Windows Smartscreen blocks the installation
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p>
+                    This is a common security feature in Windows. To proceed
+                    with the installation:
+                  </p>
+                  <ol className="list-decimal ml-6 mt-2 space-y-2">
+                    <li>
+                      Click &quot;More info&quot; when the SmartScreen popup
+                      appears
+                    </li>
+                    <li>
+                      Click &quot;Run anyway&quot; to proceed with the
+                      installation
+                    </li>
+                    <li>
+                      The app is safe and signed, but Windows may show this
+                      warning for new applications
+                    </li>
+                  </ol>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="macos-unidentified">
+                <AccordionTrigger>
+                  macOS says the app is from an unidentified developer
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p>To open the app on macOS:</p>
+                  <ol className="list-decimal ml-6 mt-2 space-y-2">
+                    <li>Right-click (or Control-click) the app icon</li>
+                    <li>Select &quot;Open&quot; from the context menu</li>
+                    <li>Click &quot;Open&quot; in the dialog box</li>
+                    <li>The app will now open and remember your choice</li>
+                  </ol>
+                </AccordionContent>
+              </AccordionItem>
+              <AccordionItem value="macos-unidentified">
+                <AccordionTrigger>
+                  macOS says the app is damaged and can&apos;t be opened
+                </AccordionTrigger>
+                <AccordionContent>
+                  <p>To open the app on macOS:</p>
+                  <ol className="list-decimal ml-6 mt-2 space-y-2">
+                    <li>Open the Terminal app</li>
+                    <li>Run the following command:</li>
+                    <li>
+                      <code>xattr -c homeycommunity-desktop.app</code>
+                    </li>
+                    <li>Click on the app icon to open it</li>
+                    <li>The app will now open</li>
+                  </ol>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="homey-not-found">
+                <AccordionTrigger>
+                  Installer can&apos;t find my Homey
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ol className="list-decimal ml-6 mt-2 space-y-2">
+                    <li>
+                      Ensure your computer and Homey are on the same network
+                    </li>
+                    <li>
+                      Check if your Homey is online and functioning properly
+                    </li>
+                    <li>Try disabling VPN or firewall temporarily</li>
+                    <li>Restart your Homey if the issue persists</li>
+                  </ol>
+                </AccordionContent>
+              </AccordionItem>
+
+              <AccordionItem value="installation-fails">
+                <AccordionTrigger>
+                  Installation fails or times out
+                </AccordionTrigger>
+                <AccordionContent>
+                  <ol className="list-decimal ml-6 mt-2 space-y-2">
+                    <li>Check your internet connection</li>
+                    <li>Ensure your Homey has enough free space</li>
+                    <li>Try restarting both your Homey and the installer</li>
+                    <li>
+                      If the issue persists, check the Homey app logs for more
+                      details
+                    </li>
+                  </ol>
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+          </CardContent>
+        </Card>
+      </div>
+
+      <div className="text-center">
         <p className="text-lg text-muted-foreground">
-          Need help? Join our{" "}
+          Still need help? Join our{" "}
           <a
             target="_blank"
             href={siteConfig.links.discord}

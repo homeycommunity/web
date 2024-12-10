@@ -18,34 +18,32 @@ export async function OPTIONS() {
 export const dynamic = "force-dynamic"
 
 // Protect GET with read:apps scope
-export const GET = requireAuth(
-  requireScopes(["read:apps"])(async (req: AuthenticatedRequest) => {
-    const apps = await prisma.app.findMany({
-      where: {
-        versions: {
-          some: {},
-        },
+export const GET = async (req: AuthenticatedRequest) => {
+  const apps = await prisma.app.findMany({
+    where: {
+      versions: {
+        some: {},
       },
-      include: {
-        versions: true,
-      },
-    })
-
-    const onlyLastVersion = apps.map((app) => {
-      return {
-        ...app,
-        versions: [app.versions[app.versions.length - 1]],
-      }
-    })
-
-    return NextResponse.json(onlyLastVersion, {
-      headers: {
-        ...corsHeaders,
-        "Content-Type": "application/json",
-      },
-    })
+    },
+    include: {
+      versions: true,
+    },
   })
-)
+
+  const onlyLastVersion = apps.map((app) => {
+    return {
+      ...app,
+      versions: [app.versions[app.versions.length - 1]],
+    }
+  })
+
+  return NextResponse.json(onlyLastVersion, {
+    headers: {
+      ...corsHeaders,
+      "Content-Type": "application/json",
+    },
+  })
+}
 
 // Protect POST with write:apps scope
 export const POST = requireAuth(
