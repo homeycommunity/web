@@ -182,7 +182,7 @@ export function StoreIdentifierView({
                               "driver_id=" + currentDriver?.id
                             : true
                         )
-                        .map((trigger) => (
+                        ?.map((trigger) => (
                           <div
                             key={trigger.id}
                             className="group rounded-lg border p-4 space-y-2 hover:border-orange-500/30 transition-colors"
@@ -242,8 +242,8 @@ export function StoreIdentifierView({
                   </CardHeader>
                   <CardContent className="overflow-hidden">
                     <div className="flex flex-col gap-4 max-h-[500px] overflow-y-auto pr-4 scrollbar-thin scrollbar-track-background scrollbar-thumb-accent">
-                      {appInfo.flow.conditions
-                        .filter((condition) =>
+                      {appInfo?.flow?.conditions
+                        ?.filter((condition) =>
                           currentDriver?.id
                             ? condition.args?.find(
                                 (arg) => arg.name === "device"
@@ -251,7 +251,7 @@ export function StoreIdentifierView({
                               "driver_id=" + currentDriver?.id
                             : true
                         )
-                        .map((condition) => (
+                        ?.map((condition) => (
                           <div
                             key={condition.id}
                             className="group rounded-lg border p-4 space-y-2 hover:border-blue-500/30 transition-colors"
@@ -311,15 +311,15 @@ export function StoreIdentifierView({
                   </CardHeader>
                   <CardContent className="overflow-hidden">
                     <div className="flex flex-col gap-4 max-h-[500px] overflow-y-auto pr-4 scrollbar-thin scrollbar-track-background scrollbar-thumb-accent">
-                      {appInfo.flow.actions
-                        .filter((action) =>
+                      {appInfo?.flow?.actions
+                        ?.filter((action) =>
                           currentDriver?.id
                             ? action.args?.find((arg) => arg.name === "device")
                                 ?.filter ===
                               "driver_id=" + currentDriver?.id
                             : true
                         )
-                        .map((action) => (
+                        ?.map((action) => (
                           <div
                             key={action.id}
                             className="group rounded-lg border p-4 space-y-2 hover:border-green-500/30 transition-colors"
