@@ -177,7 +177,7 @@ export function StoreIdentifierView({
                       {appInfo?.flow?.triggers
                         ?.filter((trigger) =>
                           currentDriver?.id
-                            ? trigger.args.find((arg) => arg.name === "device")
+                            ? trigger.args?.find((arg) => arg.name === "device")
                                 ?.filter ===
                               "driver_id=" + currentDriver?.id
                             : true
@@ -201,7 +201,7 @@ export function StoreIdentifierView({
                                   Arguments:
                                 </p>
                                 <div className="space-y-1">
-                                  {trigger.args.map((arg) => (
+                                  {trigger.args?.map((arg) => (
                                     <div key={arg.name} className="text-xs">
                                       <span className="font-medium">
                                         {arg.name}
@@ -245,7 +245,7 @@ export function StoreIdentifierView({
                       {appInfo.flow.conditions
                         .filter((condition) =>
                           currentDriver?.id
-                            ? condition.args.find(
+                            ? condition.args?.find(
                                 (arg) => arg.name === "device"
                               )?.filter ===
                               "driver_id=" + currentDriver?.id
@@ -314,7 +314,7 @@ export function StoreIdentifierView({
                       {appInfo.flow.actions
                         .filter((action) =>
                           currentDriver?.id
-                            ? action.args.find((arg) => arg.name === "device")
+                            ? action.args?.find((arg) => arg.name === "device")
                                 ?.filter ===
                               "driver_id=" + currentDriver?.id
                             : true
@@ -338,7 +338,7 @@ export function StoreIdentifierView({
                                   Arguments:
                                 </p>
                                 <div className="space-y-1">
-                                  {action.args.map((arg) => (
+                                  {action.args?.map((arg) => (
                                     <div key={arg.name} className="text-xs">
                                       <span className="font-medium">
                                         {arg.name}
