@@ -51,8 +51,23 @@ model User {
   app           App[]
   homeys        Homey[]
   homeyToken    HomeyToken?
+  apiKeys       ApiKey[]
 
   @@map("users")
+}
+
+model ApiKey {
+  id         String    @id @default(cuid())
+  name       String
+  key        String    @unique
+  userId     String    @map("user_id")
+  scopes     String?   @db.Text
+  createdAt  DateTime  @default(now()) @map("created_at")
+  lastUsedAt DateTime? @map("last_used_at")
+  expiresAt  DateTime? @map("expires_at")
+  user       User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("api_keys")
 }
 
 model HomeyToken {

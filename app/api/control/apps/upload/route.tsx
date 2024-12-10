@@ -1,141 +1,156 @@
 import { Readable } from "stream"
 import { NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { PrismaClient } from "@prisma/client"
-// unzip
 import { Client } from "minio"
 import { tarGzGlob } from "targz-glob"
 
-// with file
+import { requireScopes } from "@/lib/api-key"
+import { prisma } from "@/lib/prisma"
+import { requireAuth, type AuthenticatedRequest } from "@/app/api/middleware"
 
 export const dynamic = "force-dynamic"
-export async function POST(req: Request) {
-  try {
-    const session = await auth()
-    if (!session || !session.user) {
-      return NextResponse.json(
-        {
-          status: 401,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
 
-    const prisma = new PrismaClient()
-    const user = await prisma.user.findUnique({
-      where: {
-        email: session.user.email!,
-      },
-    })
+export const POST = requireAuth(
+  requireScopes(["write:versions"])(async (req: AuthenticatedRequest) => {
+    try {
+      const body = await req.formData()
 
-    if (!user) {
-      return NextResponse.json(
-        {
-          status: 401,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
+      const app = body.get("id")
+      const bodyFile = body.get("file")
 
-    const body = await req.formData()
-
-    // blob to zip
-
-    const app = body.get("id") as string
-    const bodyFile = body.get("file") as File
-    const fileBlob = Buffer.from(await bodyFile.arrayBuffer())
-    const archive = Readable.from(fileBlob)
-    const tarFile = bodyFile.name.replace(/\.tar\.gz$/, "")
-    const z = await tarGzGlob(archive, [
-      "./app.json",
-      "app.json",
-      "./env.json",
-      "env.json",
-    ])
-    const appInfo = JSON.parse(
-      z.get("app.json")! || z.get("./app.json")! || "{}"
-    )
-    const envInfo = JSON.parse(
-      z.get("env.json")! || z.get("./env.json")! || "{}"
-    )
-    console.log(appInfo, envInfo)
-    if (!appInfo?.id || !appInfo?.version) {
-      return NextResponse.json(
-        {
-          message: "Not a valid app.json",
-          status: 409,
-        },
-        {
-          status: 409,
-        }
-      )
-    }
-    const filename = appInfo.id + "@" + appInfo.version + ".tar.gz"
-    const appDb = await prisma.app.findFirst({
-      where: {
-        id: app,
-      },
-    })
-
-    if (appInfo.id !== appDb?.identifier) {
-      return NextResponse.json(
-        {
-          message: "Not the same identifier",
-          status: 409,
-        },
-        {
-          status: 409,
-        }
-      )
-    }
-
-    var minioClient = new Client({
-      endPoint: process.env.MINIO_ENDPOINT!,
-      port: 443,
-      useSSL: true,
-      accessKey: process.env.MINIO_TOKEN!,
-      secretKey: process.env.MINIO_SECRET!,
-    })
-
-    await minioClient.putObject("apps", filename, fileBlob)
-
-    const appVersion = await prisma.appVersion.create({
-      data: {
-        version: appInfo.version,
-        file: filename,
-        available: true,
-        experimental: true,
-        env: JSON.stringify(envInfo),
-        appinfo: appInfo,
-        appId: app,
-        approved: false,
-        publishedAt: new Date(),
-      },
-    })
-
-    return NextResponse.json(
-      {
-        message: "Uploaded",
-        status: 200,
-      },
-      {
-        status: 200,
+      if (!app || !bodyFile || !(bodyFile instanceof File)) {
+        return NextResponse.json(
+          {
+            message: "Missing required fields",
+            status: 400,
+          },
+          { status: 400 }
+        )
       }
-    )
-  } catch (e) {
-    console.log(e)
-    return NextResponse.json(
-      {
-        message: (e as Error).message,
-        status: 500,
-      },
-      { status: 500 }
-    )
-  }
-}
+
+      const fileBlob = Buffer.from(await bodyFile.arrayBuffer())
+      const archive = Readable.from(fileBlob)
+      const tarFile = bodyFile.name.replace(/\.tar\.gz$/, "")
+
+      // Extract and parse app.json and env.json from the archive
+      const z = await tarGzGlob(archive, [
+        "./app.json",
+        "app.json",
+        "./env.json",
+        "env.json",
+      ])
+
+      const appInfo = JSON.parse(
+        z.get("app.json")! || z.get("./app.json")! || "{}"
+      )
+      const envInfo = JSON.parse(
+        z.get("env.json")! || z.get("./env.json")! || "{}"
+      )
+
+      if (!appInfo?.id || !appInfo?.version) {
+        return NextResponse.json(
+          {
+            message: "Invalid app.json: missing id or version",
+            status: 409,
+          },
+          { status: 409 }
+        )
+      }
+
+      // Verify app ownership and existence
+      const appDb = await prisma.app.findFirst({
+        where: {
+          id: app as string,
+          authorId: req.auth.user.id, // Ensure user owns the app
+        },
+      })
+
+      if (!appDb) {
+        return NextResponse.json(
+          {
+            message: "App not found or unauthorized",
+            status: 404,
+          },
+          { status: 404 }
+        )
+      }
+
+      if (appInfo.id !== appDb.identifier) {
+        return NextResponse.json(
+          {
+            message: "App identifier mismatch",
+            status: 409,
+          },
+          { status: 409 }
+        )
+      }
+
+      // Check if version already exists
+      const existingVersion = await prisma.appVersion.findFirst({
+        where: {
+          appId: app as string,
+          version: appInfo.version,
+        },
+      })
+
+      if (existingVersion) {
+        return NextResponse.json(
+          {
+            message: "Version already exists",
+            status: 409,
+          },
+          { status: 409 }
+        )
+      }
+
+      const filename = `${appInfo.id}@${appInfo.version}.tar.gz`
+
+      // Upload to MinIO
+      const minioClient = new Client({
+        endPoint: process.env.MINIO_ENDPOINT!,
+        port: 443,
+        useSSL: true,
+        accessKey: process.env.MINIO_TOKEN!,
+        secretKey: process.env.MINIO_SECRET!,
+      })
+
+      await minioClient.putObject("apps", filename, fileBlob)
+
+      // Create app version in database
+      const appVersion = await prisma.appVersion.create({
+        data: {
+          version: appInfo.version,
+          file: filename,
+          available: true,
+          experimental: true,
+          env: JSON.stringify(envInfo),
+          appinfo: appInfo,
+          appId: app as string,
+          approved: false,
+          publishedAt: new Date(),
+        },
+      })
+
+      return NextResponse.json(
+        {
+          message: "Version uploaded successfully",
+          status: 200,
+          data: {
+            version: appVersion.version,
+            file: appVersion.file,
+          },
+        },
+        { status: 200 }
+      )
+    } catch (e) {
+      console.error("Error uploading version:", e)
+      return NextResponse.json(
+        {
+          message: "Internal server error",
+          error: (e as Error).message,
+          status: 500,
+        },
+        { status: 500 }
+      )
+    }
+  })
+)

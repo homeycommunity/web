@@ -1,9 +1,8 @@
 "use client"
 
 import { useRouter } from "next/navigation"
+import { Button } from "components/ui/button"
 import { PlusCircleIcon } from "lucide-react"
-
-import { Button } from "@/components/ui/button"
 
 export const AppPlus = () => {
   const router = useRouter()

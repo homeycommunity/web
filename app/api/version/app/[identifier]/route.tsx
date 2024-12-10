@@ -1,38 +1,48 @@
 import { NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
+
+import { requireScopes } from "@/lib/api-key"
+import { prisma } from "@/lib/prisma"
+
+import { requireAuth, type AuthenticatedRequest } from "../../../middleware"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
-export async function GET(
-  request: Request,
-  {
-    params: paramsPromise,
-  }: {
-    params: Promise<{
-      identifier: string
-    }>
-  }
-) {
-  const params = await paramsPromise
-  const prisma = new PrismaClient()
-  const apps = await prisma.app.findMany({
-    where: {
-      identifier: params.identifier,
-      versions: {
-        some: {},
-      },
-    },
-    include: {
-      versions: true,
-    },
-  })
 
-  if (apps.length === 0) {
-    return NextResponse.json({ error: "App not found" }, { status: 404 })
+// Use Next.js route segment config typing
+type RouteContext = {
+  params: {
+    identifier: string
   }
-
-  return NextResponse.json({
-    identifier: apps[0].identifier,
-    version: apps[0].versions[0].version,
-  })
 }
+
+export const GET = requireAuth(
+  requireScopes<RouteContext>(["read:versions"])(
+    async (request: AuthenticatedRequest, context: RouteContext) => {
+      const apps = await prisma.app.findMany({
+        where: {
+          identifier: context.params.identifier,
+          versions: {
+            some: {},
+          },
+        },
+        include: {
+          versions: {
+            orderBy: {
+              publishedAt: "desc",
+            },
+            take: 1,
+          },
+        },
+      })
+
+      if (apps.length === 0) {
+        return NextResponse.json({ error: "App not found" }, { status: 404 })
+      }
+
+      return NextResponse.json({
+        identifier: apps[0].identifier,
+        version: apps[0].versions[0].version,
+      })
+    }
+  )
+)

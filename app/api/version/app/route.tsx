@@ -1,22 +1,40 @@
-import { Octokit } from "@octokit/rest";
-import { NextResponse } from "next/server";
+import { NextResponse } from "next/server"
+import { Octokit } from "@octokit/rest"
 
-export const dynamic = 'force-dynamic';
-export const fetchCache = 'force-no-store';
-export async function GET () {
-  const octokit = new Octokit({
-    auth: process.env.GITHUB_TOKEN,
-  });
+import { requireScopes } from "@/lib/api-key"
 
-  const repo = await octokit.repos.getLatestRelease({
-    repo: 'app',
-    owner: 'homeycommunity'
-  });
+import { requireAuth, type AuthenticatedRequest } from "../../middleware"
 
-  const output = {
-    version: repo.data.tag_name,
-    url: repo.data.assets.find(asset => asset.name.endsWith('homeycommunityspace.tar.gz'))?.browser_download_url,
-  }
+export const dynamic = "force-dynamic"
+export const fetchCache = "force-no-store"
 
-  return NextResponse.json(output);
-}
+// Protect version info with read:versions scope
+export const GET = requireAuth(
+  requireScopes(["read:versions"])(async (req: AuthenticatedRequest) => {
+    const octokit = new Octokit({
+      auth: process.env.GITHUB_TOKEN,
+    })
+
+    try {
+      const repo = await octokit.repos.getLatestRelease({
+        repo: "app",
+        owner: "homeycommunity",
+      })
+
+      const output = {
+        version: repo.data.tag_name,
+        url: repo.data.assets.find((asset) =>
+          asset.name.endsWith("homeycommunityspace.tar.gz")
+        )?.browser_download_url,
+      }
+
+      return NextResponse.json(output)
+    } catch (error) {
+      console.error("Error fetching release:", error)
+      return NextResponse.json(
+        { error: "Failed to fetch version information" },
+        { status: 500 }
+      )
+    }
+  })
+)

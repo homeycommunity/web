@@ -1,96 +1,145 @@
-import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import axios from "axios"
+import { NextResponse } from "next/server"
 
-import { userInfoUrl } from "@/config/user-info"
+import { requireScopes } from "@/lib/api-key"
+import { prisma } from "@/lib/prisma"
+
+import { requireAuth, type AuthenticatedRequest } from "../../../middleware"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
   "Access-Control-Allow-Headers": "Content-Type, Authorization",
 }
-export async function OPTIONS(req: NextRequest) {
+
+export async function OPTIONS() {
   return NextResponse.json({}, { headers: corsHeaders })
 }
 
 export const dynamic = "force-dynamic"
-export async function GET(
-  req: NextRequest,
-  { params }: { params: Promise<{ identifier: string }> }
-) {
-  const auth = req.headers.get("authorization")
-  if (!auth) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
+
+type RouteContext = {
+  params: {
+    identifier: string
   }
-  const data = await axios.get(userInfoUrl(), {
-    headers: {
-      Authorization: auth,
-    },
-  })
+}
 
-  const user: string = data.data?.sub
-  if (!user) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
+export const GET = requireAuth(
+  requireScopes<RouteContext>(["read:apps"])(
+    async (request: AuthenticatedRequest, context: RouteContext) => {
+      const { identifier } = context.params
 
-  const prisma = new PrismaClient()
-  const userFromAccount = await prisma.account.findFirst({
-    where: {
-      providerAccountId: user,
-    },
-    include: {
-      user: true,
-    },
-  })
-  if (!userFromAccount) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
+      const app = await prisma.app.findFirst({
+        where: {
+          identifier,
+        },
+        include: {
+          versions: true,
+        },
+      })
 
-  const { identifier } = await params
-
-  const app = await prisma.app.findFirst({
-    where: {
-      identifier,
-    },
-    include: {
-      versions: true,
-    },
-  })
-
-  if (!app) {
-    return NextResponse.json(
-      {
-        status: 404,
-        message: "Not Found",
-      },
-      {
-        status: 404,
+      if (!app) {
+        return NextResponse.json(
+          {
+            status: 404,
+            message: "Not Found",
+          },
+          {
+            status: 404,
+            headers: corsHeaders,
+          }
+        )
       }
-    )
-  }
 
-  return NextResponse.json(
-    {
-      status: 200,
-      data: app,
-    },
-    {
-      status: 200,
+      return NextResponse.json(
+        {
+          status: 200,
+          data: app,
+        },
+        {
+          status: 200,
+          headers: corsHeaders,
+        }
+      )
     }
   )
-}
+)
+
+// Add PUT handler for updating apps with write:apps scope
+export const PUT = requireAuth(
+  requireScopes<RouteContext>(["write:apps"])(
+    async (request: AuthenticatedRequest, context: RouteContext) => {
+      const { identifier } = context.params
+      const data = await request.json()
+
+      try {
+        const app = await prisma.app.update({
+          where: {
+            identifier,
+            authorId: request.auth.user.id, // Ensure user owns the app
+          },
+          data,
+        })
+
+        return NextResponse.json(
+          {
+            status: 200,
+            data: app,
+          },
+          {
+            headers: corsHeaders,
+          }
+        )
+      } catch (error) {
+        return NextResponse.json(
+          {
+            status: 404,
+            message: "App not found or unauthorized",
+          },
+          {
+            status: 404,
+            headers: corsHeaders,
+          }
+        )
+      }
+    }
+  )
+)
+
+// Add DELETE handler with write:apps scope
+export const DELETE = requireAuth(
+  requireScopes<RouteContext>(["write:apps"])(
+    async (request: AuthenticatedRequest, context: RouteContext) => {
+      const { identifier } = context.params
+
+      try {
+        await prisma.app.delete({
+          where: {
+            identifier,
+            authorId: request.auth.user.id, // Ensure user owns the app
+          },
+        })
+
+        return NextResponse.json(
+          {
+            status: 200,
+            message: "App deleted successfully",
+          },
+          {
+            headers: corsHeaders,
+          }
+        )
+      } catch (error) {
+        return NextResponse.json(
+          {
+            status: 404,
+            message: "App not found or unauthorized",
+          },
+          {
+            status: 404,
+            headers: corsHeaders,
+          }
+        )
+      }
+    }
+  )
+)

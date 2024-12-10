@@ -1,7 +1,7 @@
 "use client"
 
 import { useRouter } from "next/navigation"
-import { User } from "lucide-react"
+import { Key, User } from "lucide-react"
 
 import Logout from "./logout"
 import { buttonVariants } from "./ui/button"
@@ -46,6 +46,13 @@ export const SessionMenu = ({ session }: SessionMenuProps) => {
           className="cursor-pointer rounded-lg hover:bg-primary/10 transition-colors py-2.5 px-3"
         >
           My Apps
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => router.push("/control/settings/api-keys")}
+          className="cursor-pointer rounded-lg hover:bg-primary/10 transition-colors py-2.5 px-3"
+        >
+          <Key className="h-4 w-4 mr-2" />
+          API Keys
         </DropdownMenuItem>
         <DropdownMenuSeparator className="bg-primary/10" />
         <Logout />
