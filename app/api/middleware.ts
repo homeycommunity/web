@@ -41,35 +41,37 @@ export async function withAuth<T>(
 
   const authString = request.headers.get("authorization")
   if (authString) {
-    const data = await axios.get(userInfoUrl(), {
-      headers: {
-        Authorization: authString,
-      },
-    })
-    const user: string = data.data?.sub
-    if (user) {
-      const prisma = new PrismaClient()
-      const userFromAccount = await prisma.account.findFirst({
-        where: {
-          providerAccountId: user,
-        },
-        include: {
-          user: true,
+    try {
+      const data = await axios.get(userInfoUrl(), {
+        headers: {
+          Authorization: authString,
         },
       })
-      if (userFromAccount) {
-        const req = request as AuthenticatedRequest
-
-        req.auth = {
-          user: {
-            id: userFromAccount.user.id,
-            email: userFromAccount.user.email,
-            name: userFromAccount.user.name,
+      const user: string = data.data?.sub
+      if (user) {
+        const prisma = new PrismaClient()
+        const userFromAccount = await prisma.account.findFirst({
+          where: {
+            providerAccountId: user,
           },
+          include: {
+            user: true,
+          },
+        })
+        if (userFromAccount) {
+          const req = request as AuthenticatedRequest
+
+          req.auth = {
+            user: {
+              id: userFromAccount.user.id,
+              email: userFromAccount.user.email,
+              name: userFromAccount.user.name,
+            },
+          }
+          return handler(req, context as T)
         }
-        return handler(req, context as T)
       }
-    }
+    } catch (error) {}
   }
 
   // Try API key authentication
