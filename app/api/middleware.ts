@@ -40,7 +40,7 @@ export async function withAuth<T>(
   }
 
   const authString = request.headers.get("authorization")
-  if (authString) {
+  if (!authString?.startsWith("hcs_")) {
     try {
       const data = await axios.get(userInfoUrl(), {
         headers: {
@@ -71,27 +71,30 @@ export async function withAuth<T>(
           return handler(req, context as T)
         }
       }
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+    }
   }
 
-  // Try API key authentication
-  const apiKeyStr = parseApiKey(authString)
-  if (apiKeyStr) {
-    const apiKey = await validateApiKey(apiKeyStr)
-    if (apiKey?.user) {
-      const req = request as AuthenticatedRequest
-      req.auth = {
-        user: {
-          id: apiKey.user.id,
-          email: apiKey.user.email,
-          name: apiKey.user.name,
-        },
-        apiKey: {
-          id: apiKey.id,
-          name: apiKey.name,
-        },
+  if (authString?.startsWith("hcs_")) {
+    const apiKeyStr = parseApiKey(authString)
+    if (apiKeyStr) {
+      const apiKey = await validateApiKey(apiKeyStr)
+      if (apiKey?.user) {
+        const req = request as AuthenticatedRequest
+        req.auth = {
+          user: {
+            id: apiKey.user.id,
+            email: apiKey.user.email,
+            name: apiKey.user.name,
+          },
+          apiKey: {
+            id: apiKey.id,
+            name: apiKey.name,
+          },
+        }
+        return handler(req, context as T)
       }
-      return handler(req, context as T)
     }
   }
 
