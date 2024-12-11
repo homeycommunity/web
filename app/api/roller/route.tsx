@@ -10,7 +10,7 @@ import {
 
 export const dynamic = "force-dynamic"
 export async function GET(request: Request) {
-  if (process.env.ROLLER_KEY === request.headers.get("x-roller-key")) {
+  if (process.env.ROLLER_KEY !== request.headers.get("x-roller-key")) {
     return new Response(JSON.stringify({}))
   }
 

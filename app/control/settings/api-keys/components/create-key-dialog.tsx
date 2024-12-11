@@ -8,6 +8,7 @@ import { useForm } from "react-hook-form"
 import {
   API_SCOPES,
   getAllRequiredScopes,
+  getIndentLevel,
   type ApiScope,
 } from "@/config/api-scopes"
 import { cn } from "@/lib/utils"
@@ -104,7 +105,7 @@ export function CreateKeyDialog({
   }
 
   const handleScopeChange = (scope: ApiScope, checked: boolean) => {
-    const currentScopes: ApiScope[] = form.getValues("scopes") as ApiScope[]
+    const currentScopes = form.getValues("scopes")
     let newScopes: ApiScope[]
 
     if (checked) {
@@ -152,29 +153,33 @@ export function CreateKeyDialog({
                 render={({ field }) => (
                   <FormItem>
                     <div className="grid gap-4 p-4 border rounded-lg bg-muted/50">
-                      {API_SCOPES.map((scope) => (
-                        <div
-                          key={scope.value}
-                          className="flex items-center space-x-2"
-                        >
-                          <FormControl>
-                            <Checkbox
-                              checked={field.value?.includes(scope.value)}
-                              onCheckedChange={(checked) => {
-                                handleScopeChange(scope.value, !!checked)
-                              }}
-                            />
-                          </FormControl>
-                          <div>
-                            <FormLabel className="!mt-0 font-medium">
-                              {scope.label}
-                            </FormLabel>
-                            <FormDescription>
-                              {scope.description}
-                            </FormDescription>
+                      {API_SCOPES.map((scope) => {
+                        const indent = getIndentLevel(scope.value) * 24
+                        return (
+                          <div
+                            key={scope.value}
+                            className="flex items-center space-x-2"
+                            style={{ marginLeft: `${indent}px` }}
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(scope.value)}
+                                onCheckedChange={(checked) => {
+                                  handleScopeChange(scope.value, !!checked)
+                                }}
+                              />
+                            </FormControl>
+                            <div>
+                              <FormLabel className="!mt-0 font-medium">
+                                {scope.label}
+                              </FormLabel>
+                              <FormDescription>
+                                {scope.description}
+                              </FormDescription>
+                            </div>
                           </div>
-                        </div>
-                      ))}
+                        )
+                      })}
                     </div>
                     <FormMessage />
                   </FormItem>
@@ -210,6 +215,7 @@ export function CreateKeyDialog({
                           ))}
                         </SelectContent>
                       </Select>
+
                       {field.value === "custom" && (
                         <FormField
                           control={form.control}

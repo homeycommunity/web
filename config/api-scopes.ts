@@ -1,39 +1,58 @@
+type BaseScopeConfig = {
+  value: string
+  label: string
+  description: string
+  indent: number
+}
+
+type ReadScopeConfig = BaseScopeConfig & {
+  requires?: never
+}
+
+type WriteScopeConfig = BaseScopeConfig & {
+  requires: readonly string[]
+}
+
+type ScopeConfig = ReadScopeConfig | WriteScopeConfig
+
 export const API_SCOPES = [
   {
     value: "read:apps",
-    label: "Read Apps",
+    label: "Apps - Read",
     description: "View app information and details",
-    dependencies: [] as string[],
+    indent: 0,
   },
   {
     value: "write:apps",
-    label: "Write Apps",
+    label: "Apps - Write",
     description: "Create and modify apps",
-    dependencies: ["read:apps"] as const,
+    indent: 1,
+    requires: ["read:apps"] as const,
   },
   {
     value: "read:versions",
-    label: "Read Versions",
+    label: "Versions - Read",
     description: "View app version information",
-    dependencies: [] as string[],
+    indent: 0,
   },
   {
     value: "write:versions",
-    label: "Write Versions",
+    label: "Versions - Write",
     description: "Create and modify app versions",
-    dependencies: ["read:versions"] as const,
+    indent: 1,
+    requires: ["read:versions"] as const,
   },
   {
     value: "homey:devices",
     label: "Homey Devices",
     description: "Control Homey devices",
-    dependencies: [] as string[],
+    indent: 0,
   },
   {
     value: "homey:flows",
     label: "Homey Flows",
     description: "Trigger Homey flows",
-    dependencies: [] as string[],
+    indent: 0,
   },
 ] as const
 
@@ -48,24 +67,12 @@ export function getApiScopeDescription(scope: ApiScope) {
 }
 
 export function getApiScopeDependencies(scope: ApiScope): ApiScope[] {
-  return (API_SCOPES.find((s) => s.value === scope)?.dependencies ||
-    []) as ApiScope[]
+  const scopeConfig = API_SCOPES.find((s) => s.value === scope)
+  return (
+    scopeConfig && "requires" in scopeConfig ? scopeConfig.requires : []
+  ) as ApiScope[]
 }
 
-// Checks if scopes array includes the required scope and its dependencies
-export function hasScopeWithDependencies(
-  scopes: ApiScope[],
-  requiredScope: ApiScope
-): boolean {
-  if (!scopes.includes(requiredScope)) {
-    return false
-  }
-
-  const dependencies = getApiScopeDependencies(requiredScope)
-  return dependencies.every((dep) => scopes.includes(dep))
-}
-
-// Gets all required scopes including dependencies
 export function getAllRequiredScopes(scopes: ApiScope[]): ApiScope[] {
   const allScopes = new Set<ApiScope>(scopes)
 
@@ -75,4 +82,8 @@ export function getAllRequiredScopes(scopes: ApiScope[]): ApiScope[] {
   })
 
   return Array.from(allScopes)
+}
+
+export function getIndentLevel(scope: ApiScope): number {
+  return API_SCOPES.find((s) => s.value === scope)?.indent || 0
 }
