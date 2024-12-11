@@ -40,7 +40,7 @@ export async function withAuth<T>(
   }
 
   const authString = request.headers.get("authorization")
-  if (!authString?.startsWith("hcs_")) {
+  if (authString && !authString?.startsWith("hcs_")) {
     try {
       const data = await axios.get(userInfoUrl(), {
         headers: {
