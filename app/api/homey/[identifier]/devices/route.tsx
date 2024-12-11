@@ -33,8 +33,6 @@ export const GET = requireAuth(
         token.encryptionKey!
       )
 
-      console.log("awa", decryptSessionToken)
-
       const devices = await axios.get(
         `${homey?.remoteUrl}/api/manager/devices/device`,
         {
