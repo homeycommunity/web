@@ -93,6 +93,8 @@ export async function GET(
     return new Response(
       JSON.stringify({
         token: decryptedAccessToken,
+        sessionToken: decryptToken(homey?.sessionToken!, token.encryptionKey),
+        expiresAt: token?.expires.getTime(),
         eventKey: homey?.eventKey,
       }),
       {
