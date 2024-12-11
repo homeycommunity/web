@@ -18,7 +18,7 @@ export async function GET(request: Request) {
   const tokens = await prisma.homeyToken.findMany()
   for (const token of tokens) {
     if (
-      token.expires.getTime() < Date.now() - 900000 ||
+      token.expires.getTime() < Date.now() + 900000 ||
       request.headers.get("x-force-update") === "true"
     ) {
       const decryptedRefreshToken = decryptToken(
