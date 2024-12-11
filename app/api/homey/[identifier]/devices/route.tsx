@@ -6,7 +6,7 @@ import { prisma } from "@/lib/prisma"
 import { AuthenticatedRequest, requireAuth } from "@/app/api/middleware"
 
 export const GET = requireAuth(
-  requireScopes<{ params: Promise<{ identifier: string }> }>(["write:apps"])(
+  requireScopes<{ params: Promise<{ identifier: string }> }>(["homey:devices"])(
     async (
       req: AuthenticatedRequest,
       { params }: { params: Promise<{ identifier: string }> }
