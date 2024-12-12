@@ -1,4 +1,4 @@
-export type SiteConfig = typeof siteConfig;
+export type SiteConfig = typeof siteConfig
 
 export const siteConfig = {
   name: "Homey Community Space",
@@ -17,9 +17,13 @@ export const siteConfig = {
       title: "Download",
       href: "/download",
     },
+    {
+      title: "API Docs",
+      href: "/docs/api",
+    },
   ],
   links: {
     discord: "/discord",
     github: "https://github.com/homeycommunity",
   },
-};
+}
