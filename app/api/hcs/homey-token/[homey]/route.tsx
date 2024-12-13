@@ -1,9 +1,8 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import axios from "axios"
 
-import { userInfoUrl } from "@/config/user-info"
+import { prisma } from "@/lib/prisma"
 import { decryptToken } from "@/lib/token-encryption"
+import { AuthenticatedRequest, requireAuth } from "@/app/api/middleware"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,100 +16,61 @@ export async function OPTIONS(req: NextRequest) {
 
 export const dynamic = "force-dynamic"
 
-export async function GET(
-  req: NextRequest,
-  { params: paramsPromise }: { params: Promise<{ homey: string }> }
-) {
-  const params = await paramsPromise
-  const auth = req.headers.get("authorization")
-  if (!auth) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-  const data = await axios.get(userInfoUrl(), {
-    headers: {
-      Authorization: auth,
-    },
-  })
+export const GET = requireAuth(
+  async (
+    req: AuthenticatedRequest,
+    { params: paramsPromise }: { params: Promise<{ homey: string }> }
+  ) => {
+    const params = await paramsPromise
 
-  const user: string = data.data?.sub
-  if (!user) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
+    const token = await prisma.homeyToken.findFirst({
+      where: {
+        userId: req.auth?.user?.id,
       },
     })
-  }
-  const prisma = new PrismaClient()
-  const userFromAccount = await prisma.account.findFirst({
-    where: {
-      providerAccountId: user,
-    },
-    include: {
-      user: true,
-    },
-  })
-  if (!userFromAccount) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
+    const homey = await prisma.homey.findFirst({
+      where: {
+        userId: req.auth?.user?.id,
+        homeyId: params.homey,
       },
     })
-  }
-  const userObj = userFromAccount.user
-  const token = await prisma.homeyToken.findFirst({
-    where: {
-      userId: userObj.id,
-    },
-  })
-  const homey = await prisma.homey.findFirst({
-    where: {
-      userId: userObj.id,
-      homeyId: params.homey,
-    },
-  })
-  if (!token || !token.encryptionKey) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-
-  try {
-    const decryptedAccessToken = decryptToken(
-      token.accessToken,
-      token.encryptionKey
-    )
-
-    return new Response(
-      JSON.stringify({
-        token: decryptedAccessToken,
-        sessionToken: decryptToken(homey?.sessionToken!, token.encryptionKey),
-        expiresAt: token?.expires.getTime(),
-        eventKey: homey?.eventKey,
-      }),
-      {
+    if (!token || !token.encryptionKey) {
+      return new Response("{}", {
         headers: {
           "Content-Type": "application/json",
           ...corsHeaders,
         },
-      }
-    )
-  } catch (error) {
-    console.error("Failed to decrypt token:", error)
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
+      })
+    }
+
+    try {
+      const decryptedAccessToken = decryptToken(
+        token.accessToken,
+        token.encryptionKey
+      )
+
+      return new Response(
+        JSON.stringify({
+          token: decryptedAccessToken,
+          sessionToken: decryptToken(homey?.sessionToken!, token.encryptionKey),
+          expiresAt: token?.expires.getTime(),
+          eventKey: homey?.eventKey,
+        }),
+        {
+          headers: {
+            "Content-Type": "application/json",
+            ...corsHeaders,
+          },
+        }
+      )
+    } catch (error) {
+      console.error("Failed to decrypt token:", error)
+      return new Response("{}", {
+        headers: {
+          "Content-Type": "application/json",
+          ...corsHeaders,
+        },
+      })
+    }
   }
-}
+)

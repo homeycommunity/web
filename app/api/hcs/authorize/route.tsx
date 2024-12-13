@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import axios from "axios"
 import { connect } from "emitter-io"
 
-import { userInfoUrl } from "@/config/user-info"
+import { prisma } from "@/lib/prisma"
 import { getSessionTokenFromAccessToken } from "@/lib/session-token"
 import { encryptToken, generateEncryptionKey } from "@/lib/token-encryption"
+
+import { AuthenticatedRequest, requireAuth } from "../../middleware"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -19,54 +19,10 @@ export async function OPTIONS(req: NextRequest) {
 
 export const dynamic = "force-dynamic"
 
-export async function POST(req: NextRequest) {
-  const auth = req.headers.get("authorization")
-  if (!auth) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
+export const POST = requireAuth(async (req: AuthenticatedRequest) => {
+  const userObj = req.auth?.user
 
-  const data = await axios.get(userInfoUrl(), {
-    headers: {
-      Authorization: auth,
-    },
-  })
-  const user: string = data.data?.sub
-  if (!user) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-
-  const prisma = new PrismaClient()
-  const userFromAccount = await prisma.account.findFirst({
-    where: {
-      providerAccountId: user,
-    },
-    include: {
-      user: true,
-    },
-  })
-
-  if (!userFromAccount) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-
-  const userObj = userFromAccount.user
   const input = await req.json()
-  console.log(input)
   await Promise.all(
     input.homey.map(async (homey: any) => {
       const homeyInDB = await prisma.homey.findFirst({
@@ -193,4 +149,4 @@ export async function POST(req: NextRequest) {
       ...corsHeaders,
     },
   })
-}
+})

@@ -1,13 +1,11 @@
-import { NextResponse } from "next/server"
+import { NextRequest, NextResponse } from "next/server"
 import { Octokit } from "@octokit/rest"
-
-import { type AuthenticatedRequest } from "../../middleware"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
 
 // Protect version info with read:versions scope
-export const GET = async (req: AuthenticatedRequest) => {
+export const GET = async (req: NextRequest) => {
   const octokit = new Octokit({
     auth: process.env.GITHUB_TOKEN,
   })

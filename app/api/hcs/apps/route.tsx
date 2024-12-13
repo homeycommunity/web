@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 
-import { requireScopes } from "@/lib/api-key"
 import { prisma } from "@/lib/prisma"
 
 import { requireAuth, type AuthenticatedRequest } from "../../middleware"
@@ -46,20 +45,18 @@ export const GET = async (req: AuthenticatedRequest) => {
 }
 
 // Protect POST with write:apps scope
-export const POST = requireAuth(
-  requireScopes(["write:apps"])(async (req: AuthenticatedRequest) => {
-    try {
-      const data = await req.json()
-      // Handle app creation logic here
-      return NextResponse.json(
-        { message: "App created" },
-        { headers: corsHeaders }
-      )
-    } catch (error) {
-      return NextResponse.json(
-        { error: "Failed to create app" },
-        { status: 400, headers: corsHeaders }
-      )
-    }
-  })
-)
+export const POST = requireAuth(async (req: AuthenticatedRequest) => {
+  try {
+    const data = await req.json()
+    // Handle app creation logic here
+    return NextResponse.json(
+      { message: "App created" },
+      { headers: corsHeaders }
+    )
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Failed to create app" },
+      { status: 400, headers: corsHeaders }
+    )
+  }
+})

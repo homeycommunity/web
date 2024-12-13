@@ -1,44 +1,13 @@
-import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { PrismaClient } from "@prisma/client"
+import { NextResponse } from "next/server"
 
+import { prisma } from "@/lib/prisma"
+import { AuthenticatedRequest, requireAuth } from "@/app/api/middleware"
 import { controlAppsNewSchema } from "@/app/control/apps/new/schema"
 
 export const dynamic = "force-dynamic"
 
-export const POST = async (req: NextRequest) => {
+export const POST = requireAuth(async (req: AuthenticatedRequest) => {
   try {
-    const session = await auth()
-    if (!session || !session.user) {
-      return NextResponse.json(
-        {
-          status: 401,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
-    const prisma = new PrismaClient()
-    const user = await prisma.user.findUnique({
-      where: {
-        email: session.user.email!,
-      },
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          status: 401,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
     const body = await req.json()
     const validatedBody = controlAppsNewSchema.parse(body)
     // check if app already exists
@@ -58,6 +27,7 @@ export const POST = async (req: NextRequest) => {
         }
       )
     }
+
     await prisma.app.create({
       data: {
         name: validatedBody.name,
@@ -65,7 +35,7 @@ export const POST = async (req: NextRequest) => {
         identifier: validatedBody.identifier,
         author: {
           connect: {
-            id: user.id,
+            id: req.auth.user.id,
           },
         },
       },
@@ -90,4 +60,4 @@ export const POST = async (req: NextRequest) => {
       }
     )
   }
-}
+})

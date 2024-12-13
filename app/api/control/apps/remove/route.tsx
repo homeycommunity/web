@@ -1,48 +1,18 @@
-import { NextRequest, NextResponse } from "next/server"
-import { auth } from "@/auth"
-import { PrismaClient } from "@prisma/client"
+import { NextResponse } from "next/server"
+
+import { prisma } from "@/lib/prisma"
+import { AuthenticatedRequest, requireAuth } from "@/app/api/middleware"
 
 export const dynamic = "force-dynamic"
 
-export async function DELETE(req: NextRequest) {
+export const DELETE = requireAuth(async (req: AuthenticatedRequest) => {
   try {
-    const session = await auth()
-    if (!session || !session.user) {
-      return NextResponse.json(
-        {
-          status: 401,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
-    const prisma = new PrismaClient()
-    const user = await prisma.user.findUnique({
-      where: {
-        email: session.user.email!,
-      },
-    })
-
-    if (!user) {
-      return NextResponse.json(
-        {
-          status: 401,
-          message: "Unauthorized",
-        },
-        {
-          status: 401,
-        }
-      )
-    }
-
     const body = await req.json()
 
     await prisma.app.delete({
       where: {
         id: body.id,
+        authorId: req.auth.user.id,
       },
       include: {
         versions: true,
@@ -60,5 +30,12 @@ export async function DELETE(req: NextRequest) {
     )
   } catch (e) {
     console.log(e)
+    return NextResponse.json(
+      {
+        status: 500,
+        message: "Internal Server Error",
+      },
+      { status: 500 }
+    )
   }
-}
+})

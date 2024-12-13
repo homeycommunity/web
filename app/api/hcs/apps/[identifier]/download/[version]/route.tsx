@@ -1,10 +1,9 @@
 import { NextRequest, NextResponse } from "next/server"
-import { PrismaClient } from "@prisma/client"
-import axios from "axios"
 import { Client } from "minio"
 
-import { userInfoUrl } from "@/config/user-info"
+import { prisma } from "@/lib/prisma"
 import { stream2buffer } from "@/lib/stream2buffer"
+import { AuthenticatedRequest, requireAuth } from "@/app/api/middleware"
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -17,100 +16,59 @@ export async function OPTIONS(req: NextRequest) {
 
 export const dynamic = "force-dynamic"
 
-export async function GET(
-  req: NextRequest,
-  {
-    params: paramsPromise,
-  }: { params: Promise<{ identifier: string; version: string }> },
-  res: NextResponse
-) {
-  const params = await paramsPromise
-  const auth = req.headers.get("authorization")
-  if (!auth) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
+export const GET = requireAuth(
+  async (
+    req: AuthenticatedRequest,
+    {
+      params: paramsPromise,
+    }: { params: Promise<{ identifier: string; version: string }> }
+  ) => {
+    const params = await paramsPromise
+
+    const { identifier, version } = params
+
+    const app = await prisma.app.findFirst({
+      where: {
+        identifier,
       },
-    })
-  }
-  const data = await axios.get(userInfoUrl(), {
-    headers: {
-      Authorization: auth,
-    },
-  })
-
-  const user: string = data.data?.sub
-  if (!user) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-
-  const prisma = new PrismaClient()
-  const userFromAccount = await prisma.account.findFirst({
-    where: {
-      providerAccountId: user,
-    },
-    include: {
-      user: true,
-    },
-  })
-  if (!userFromAccount) {
-    return new Response("{}", {
-      headers: {
-        "Content-Type": "application/json",
-        ...corsHeaders,
-      },
-    })
-  }
-
-  const { identifier, version } = params
-
-  const app = await prisma.app.findFirst({
-    where: {
-      identifier,
-    },
-    include: {
-      versions: {
-        where: {
-          version,
+      include: {
+        versions: {
+          where: {
+            version,
+          },
+          take: 1,
         },
-        take: 1,
       },
-    },
-  })
+    })
 
-  if (!app || !app.versions?.[0]) {
-    return NextResponse.json(
-      {
-        status: 404,
-        message: "Not Found",
+    if (!app || !app.versions?.[0]) {
+      return NextResponse.json(
+        {
+          status: 404,
+          message: "Not Found",
+        },
+        {
+          status: 404,
+        }
+      )
+    }
+
+    var minioClient = new Client({
+      endPoint: "storage.homeycommunity.space",
+      port: 443,
+      useSSL: true,
+      accessKey: process.env.MINIO_TOKEN!,
+      secretKey: process.env.MINIO_SECRET!,
+    })
+
+    const file = await minioClient.getObject("apps", app.versions[0].file)
+
+    return new NextResponse(await stream2buffer(file), {
+      headers: {
+        "Content-Type": "application/gzip",
+        "Content-Disposition": `attachment; filename="${app.identifier}.tar.gz"`,
+        ...corsHeaders,
       },
-      {
-        status: 404,
-      }
-    )
+    })
   }
-
-  var minioClient = new Client({
-    endPoint: "storage.homeycommunity.space",
-    port: 443,
-    useSSL: true,
-    accessKey: process.env.MINIO_TOKEN!,
-    secretKey: process.env.MINIO_SECRET!,
-  })
-
-  const file = await minioClient.getObject("apps", app.versions[0].file)
-
-  return new NextResponse(await stream2buffer(file), {
-    headers: {
-      "Content-Type": "application/gzip",
-      "Content-Disposition": `attachment; filename="${app.identifier}.tar.gz"`,
-      ...corsHeaders,
-    },
-  })
-}
+)

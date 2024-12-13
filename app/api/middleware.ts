@@ -4,7 +4,6 @@ import { PrismaClient } from "@prisma/client"
 import axios from "axios"
 
 import { userInfoUrl } from "@/config/user-info"
-import { parseApiKey, validateApiKey } from "@/lib/api-key"
 
 export type AuthenticatedRequest = NextRequest & {
   auth: {
@@ -73,28 +72,6 @@ export async function withAuth<T>(
       }
     } catch (error) {
       console.log(error)
-    }
-  }
-
-  if (authString?.startsWith("hcs_")) {
-    const apiKeyStr = parseApiKey(authString)
-    if (apiKeyStr) {
-      const apiKey = await validateApiKey(apiKeyStr)
-      if (apiKey?.user) {
-        const req = request as AuthenticatedRequest
-        req.auth = {
-          user: {
-            id: apiKey.user.id,
-            email: apiKey.user.email,
-            name: apiKey.user.name,
-          },
-          apiKey: {
-            id: apiKey.id,
-            name: apiKey.name,
-          },
-        }
-        return handler(req, context as T)
-      }
     }
   }
 

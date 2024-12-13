@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server"
 
-import { requireScopes } from "@/lib/api-key"
 import { prisma } from "@/lib/prisma"
 
 import { requireAuth, type AuthenticatedRequest } from "../../../middleware"
@@ -24,31 +23,58 @@ interface RouteContext {
 }
 
 export const GET = requireAuth(
-  requireScopes<RouteContext>(["read:apps"])(
-    async (request: AuthenticatedRequest, { params }: RouteContext) => {
-      const { identifier } = await params
+  async (request: AuthenticatedRequest, { params }: RouteContext) => {
+    const { identifier } = await params
 
-      const app = await prisma.app.findFirst({
+    const app = await prisma.app.findFirst({
+      where: {
+        identifier,
+      },
+      include: {
+        versions: true,
+      },
+    })
+
+    if (!app) {
+      return NextResponse.json(
+        {
+          status: 404,
+          message: "Not Found",
+        },
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      )
+    }
+
+    return NextResponse.json(
+      {
+        status: 200,
+        data: app,
+      },
+      {
+        status: 200,
+        headers: corsHeaders,
+      }
+    )
+  }
+)
+
+// Add PUT handler for updating apps with write:apps scope
+export const PUT = requireAuth(
+  async (request: AuthenticatedRequest, { params }: RouteContext) => {
+    const { identifier } = await params
+    const data = await request.json()
+
+    try {
+      const app = await prisma.app.update({
         where: {
           identifier,
+          authorId: request.auth.user.id, // Ensure user owns the app
         },
-        include: {
-          versions: true,
-        },
+        data,
       })
-
-      if (!app) {
-        return NextResponse.json(
-          {
-            status: 404,
-            message: "Not Found",
-          },
-          {
-            status: 404,
-            headers: corsHeaders,
-          }
-        )
-      }
 
       return NextResponse.json(
         {
@@ -56,90 +82,57 @@ export const GET = requireAuth(
           data: app,
         },
         {
-          status: 200,
+          headers: corsHeaders,
+        }
+      )
+    } catch (error) {
+      return NextResponse.json(
+        {
+          status: 404,
+          message: "App not found or unauthorized",
+        },
+        {
+          status: 404,
           headers: corsHeaders,
         }
       )
     }
-  )
-)
-
-// Add PUT handler for updating apps with write:apps scope
-export const PUT = requireAuth(
-  requireScopes<RouteContext>(["write:apps"])(
-    async (request: AuthenticatedRequest, { params }: RouteContext) => {
-      const { identifier } = await params
-      const data = await request.json()
-
-      try {
-        const app = await prisma.app.update({
-          where: {
-            identifier,
-            authorId: request.auth.user.id, // Ensure user owns the app
-          },
-          data,
-        })
-
-        return NextResponse.json(
-          {
-            status: 200,
-            data: app,
-          },
-          {
-            headers: corsHeaders,
-          }
-        )
-      } catch (error) {
-        return NextResponse.json(
-          {
-            status: 404,
-            message: "App not found or unauthorized",
-          },
-          {
-            status: 404,
-            headers: corsHeaders,
-          }
-        )
-      }
-    }
-  )
+  }
 )
 
 // Add DELETE handler with write:apps scope
 export const DELETE = requireAuth(
-  requireScopes<RouteContext>(["write:apps"])(
-    async (request: AuthenticatedRequest, { params }: RouteContext) => {
-      const { identifier } = await params
+  async (request: AuthenticatedRequest, { params }: RouteContext) => {
+    const { identifier } = await params
 
-      try {
-        await prisma.app.delete({
-          where: {
-            identifier,
-            authorId: request.auth.user.id, // Ensure user owns the app
-          },
-        })
+    try {
+      await prisma.app.delete({
+        where: {
+          identifier,
+          authorId: request.auth.user.id, // Ensure user owns the app
+        },
+      })
 
-        return NextResponse.json(
-          {
-            status: 200,
-            message: "App deleted successfully",
-          },
-          {
-            headers: corsHeaders,
-          }
-        )
-      } catch (error) {
-        return NextResponse.json(
-          {
-            status: 404,
-            message: "App not found or unauthorized",
-          },
-          {
-            status: 404,
-            headers: corsHeaders,
-          }
-        )
-      }
+      return NextResponse.json(
+        {
+          status: 200,
+          message: "App deleted successfully",
+        },
+        {
+          headers: corsHeaders,
+        }
+      )
+    } catch (error) {
+      return NextResponse.json(
+        {
+          status: 404,
+          message: "App not found or unauthorized",
+        },
+        {
+          status: 404,
+          headers: corsHeaders,
+        }
+      )
     }
-  )
+  }
 )
