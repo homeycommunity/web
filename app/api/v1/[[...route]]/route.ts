@@ -8,7 +8,7 @@ import { auth } from "./_middleware/auth"
 
 export const runtime = "nodejs"
 
-export const app = new Hono().basePath("/api/v1")
+const app = new Hono().basePath("/api/v1")
 
 app.get(homeyApps.url, homeyApps.description, auth, homeyApps.handler)
 app.route("/app", versionRoute)
@@ -44,3 +44,7 @@ app.get(
 
 export const GET = handle(app)
 export const POST = handle(app)
+export const PUT = handle(app)
+export const DELETE = handle(app)
+export const PATCH = handle(app)
+export const OPTIONS = handle(app)
