@@ -1,3 +1,5 @@
+import { obfuscateApiKey } from "lib/utils"
+
 interface Header {
   name: string
   value: string
@@ -38,7 +40,7 @@ export function EndpointHeaders({ headers, apiKey }: EndpointHeadersProps) {
                 <td className="px-4 py-2 font-mono text-sm">{header.name}</td>
                 <td className="px-4 py-2 font-mono text-sm">
                   {header.name === "Authorization"
-                    ? `Bearer ${apiKey || "<api_key>"}`
+                    ? `Bearer ${obfuscateApiKey(apiKey)}`
                     : header.value}
                 </td>
                 <td className="px-4 py-2 text-sm">

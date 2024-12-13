@@ -1,15 +1,20 @@
 "use client"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
+import { Accordion } from "components/ui/accordion"
+import { Button } from "components/ui/button"
+import { Card, CardContent, CardHeader } from "components/ui/card"
+import { Input } from "components/ui/input"
 import { Info, Lock } from "lucide-react"
 
-import { apiEndpoints } from "@/config/api-endpoints"
-import { Accordion } from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
+import { obfuscateApiKey } from "@/lib/utils"
 
 import { EndpointDocs } from "./components/endpoint-docs"
+import type { TransformedEndpoint } from "./lib/fetch-openapi"
+import {
+  fetchOpenAPISpec,
+  transformOpenAPIToEndpoints,
+} from "./lib/fetch-openapi"
 
 export default function ApiDocsPage() {
   const [apiKey, setApiKey] = useState("")
@@ -17,9 +22,33 @@ export default function ApiDocsPage() {
   const [paramValues, setParamValues] = useState<
     Record<number, Record<string, string>>
   >({})
+  const [isApiKeyVisible, setIsApiKeyVisible] = useState(false)
   const [bodyValues, setBodyValues] = useState<
     Record<number, Record<string, string>>
   >({})
+  const [endpoints, setEndpoints] = useState<TransformedEndpoint[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    async function loadOpenAPISpec() {
+      try {
+        const spec = await fetchOpenAPISpec()
+        const transformedEndpoints = transformOpenAPIToEndpoints(spec)
+        setEndpoints(transformedEndpoints)
+      } catch (err) {
+        setError(
+          err instanceof Error
+            ? err.message
+            : "Failed to load API documentation"
+        )
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    loadOpenAPISpec()
+  }, [])
 
   const handleParamChange = (
     endpointIndex: number,
@@ -47,6 +76,26 @@ export default function ApiDocsPage() {
         [name]: value,
       },
     }))
+  }
+
+  if (isLoading) {
+    return (
+      <main className="container py-6">
+        <div className="flex items-center justify-center">
+          <p className="text-muted-foreground">Loading API documentation...</p>
+        </div>
+      </main>
+    )
+  }
+
+  if (error) {
+    return (
+      <main className="container py-6">
+        <div className="flex items-center justify-center">
+          <p className="text-red-500">Error: {error}</p>
+        </div>
+      </main>
+    )
   }
 
   return (
@@ -80,8 +129,14 @@ export default function ApiDocsPage() {
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
                 className="max-w-md font-mono"
-                type="password"
+                type={isApiKeyVisible ? "text" : "password"}
               />
+              <Button
+                variant="outline"
+                onClick={() => setIsApiKeyVisible(!isApiKeyVisible)}
+              >
+                {isApiKeyVisible ? "Hide" : "Show"}
+              </Button>
               <Button variant="secondary" onClick={() => setApiKey("")}>
                 Clear
               </Button>
@@ -93,7 +148,7 @@ export default function ApiDocsPage() {
                   Include this header in all API requests:
                 </p>
                 <code className="text-sm font-mono px-2 py-1 rounded bg-muted">
-                  Authorization: Bearer {apiKey || "<api_key>"}
+                  Authorization: Bearer {obfuscateApiKey(apiKey)}
                 </code>
               </div>
             </div>
@@ -108,7 +163,7 @@ export default function ApiDocsPage() {
             <div className="flex items-center gap-2">
               <h2 className="text-lg font-semibold">Endpoints</h2>
               <span className="text-sm text-muted-foreground">
-                {apiEndpoints.length} available
+                {endpoints.length} available
               </span>
             </div>
           </div>
@@ -121,7 +176,7 @@ export default function ApiDocsPage() {
             value={expandedEndpoint}
             onValueChange={(value) => setExpandedEndpoint(value || "")}
           >
-            {apiEndpoints.map((endpoint, index) => (
+            {endpoints.map((endpoint, index) => (
               <EndpointDocs
                 key={index}
                 endpoint={endpoint}

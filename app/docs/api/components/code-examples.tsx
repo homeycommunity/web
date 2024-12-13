@@ -1,17 +1,17 @@
 "use client"
 
 import { useState } from "react"
+import { Button } from "components/ui/button"
+import { cn, obfuscateApiKey } from "lib/utils"
 
-import { apiEndpoints } from "@/config/api-endpoints"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/button"
-
+import { TransformedEndpoint } from "../lib/fetch-openapi"
+import { getBaseUrl } from "../lib/get-base-url"
 import { CodeBlock } from "./code-block"
 
 type Language = "curl" | "javascript" | "php" | "typescript"
 
 interface CodeExamplesProps {
-  endpoint: (typeof apiEndpoints)[0]
+  endpoint: TransformedEndpoint
   apiKey: string
   paramValues: Record<string, string>
   bodyValues: Record<string, string>
@@ -28,9 +28,9 @@ export function CodeExamples({
   const generateUrl = () => {
     let url = endpoint.path
     Object.entries(paramValues).forEach(([key, value]) => {
-      url = url.replace(`:${key}`, value || `:${key}`)
+      url = url.replace(`{${key}}`, value || `example_${key}`)
     })
-    return `https://store.homey.community${url}`
+    return `${getBaseUrl()}${url}`
   }
 
   const getHeaders = () => {
@@ -39,10 +39,10 @@ export function CodeExamples({
         ...acc,
         [header.name]:
           header.name === "Authorization"
-            ? `Bearer ${apiKey || "<api_key>"}`
+            ? `Bearer ${obfuscateApiKey(apiKey)}`
             : header.value,
       }),
-      {}
+      {} as Record<string, string>
     )
   }
 
@@ -53,45 +53,54 @@ export function CodeExamples({
       return endpoint.body.fields.reduce(
         (acc, field) => ({
           ...acc,
-          [field.name]: bodyValues[field.name] || "",
+          [field.name]: bodyValues[field.name] || `example_${field.name}`,
         }),
-        {}
+        {} as Record<string, string>
       )
     }
 
     const formData = new FormData()
     endpoint.body.fields.forEach((field) => {
-      formData.append(field.name, bodyValues[field.name] || "")
+      formData.append(
+        field.name,
+        bodyValues[field.name] || `example_${field.name}`
+      )
     })
     return formData
+  }
+
+  const formatTypeValue = (value: any, indent = 0): string => {
+    const spaces = "  ".repeat(indent)
+
+    if (Array.isArray(value)) {
+      if (value.length === 0) return "Array<any>"
+      const itemType =
+        typeof value[0] === "object"
+          ? `{\n${Object.entries(value[0])
+              .map(([k, v]) => `${spaces}    ${k}: ${typeof v}`)
+              .join(",\n")}\n${spaces}  }`
+          : typeof value[0]
+      return `Array<${itemType}>`
+    }
+
+    if (typeof value === "object" && value !== null) {
+      return `{\n${Object.entries(value)
+        .map(([k, v]) => `${spaces}  ${k}: ${formatTypeValue(v, indent + 1)}`)
+        .join(",\n")}\n${spaces}}`
+    }
+
+    return typeof value
   }
 
   const generateTypeScript = () => {
     const headers = getHeaders()
     const body = getBody()
+    const firstOkResponse =
+      endpoint.responses.find((r) => r.status >= 200 && r.status < 300) ||
+      endpoint.responses[0]
+    const example = firstOkResponse?.example || {}
 
-    return `interface Response {
-  ${Object.entries(endpoint.responses[0].example)
-    .map(
-      ([key, value]) =>
-        `${key}: ${
-          typeof value === "object"
-            ? Array.isArray(value)
-              ? `Array<${
-                  typeof value[0] === "object"
-                    ? `{\n    ${Object.entries(value[0])
-                        .map(([k, v]) => `${k}: ${typeof v}`)
-                        .join(",\n    ")}\n  }`
-                    : typeof value[0]
-                }>`
-              : `{\n    ${Object.entries(value)
-                  .map(([k, v]) => `${k}: ${typeof v}`)
-                  .join(",\n    ")}\n  }`
-            : typeof value
-        }`
-    )
-    .join(",\n  ")}
-}
+    return `interface Response ${formatTypeValue(example, 0)}
 
 async function call${endpoint.method.toLowerCase().replace(/^\w/, (c) => c.toUpperCase())}${endpoint.path
       .split("/")
@@ -114,13 +123,13 @@ async function call${endpoint.method.toLowerCase().replace(/^\w/, (c) => c.toUpp
     }): Promise<Response> {
   const response = await fetch("${generateUrl()}", {
     method: "${endpoint.method}",
-    headers: ${JSON.stringify(headers, null, 4)},${
+    headers: ${JSON.stringify(headers, null, 2)},${
       body
         ? `
     ${
       endpoint.body?.type === "json"
-        ? `body: JSON.stringify(${JSON.stringify(body, null, 4)}),`
-        : `body: formData, // FormData with: ${Object.keys(body as FormData).join(", ")}`
+        ? `body: JSON.stringify(${JSON.stringify(body, null, 2)}),`
+        : `body: formData, // FormData with: ${endpoint.body?.fields.map((f) => f.name).join(", ")}`
     }`
         : ""
     }
@@ -139,17 +148,17 @@ async function call${endpoint.method.toLowerCase().replace(/^\w/, (c) => c.toUpp
     const body = getBody()
 
     return `// Using async/await
-async function call${endpoint.method.toLowerCase()}() {
+async function callApi() {
   try {
     const response = await fetch("${generateUrl()}", {
       method: "${endpoint.method}",
-      headers: ${JSON.stringify(headers, null, 4)},${
+      headers: ${JSON.stringify(headers, null, 2)},${
         body
           ? `
       ${
         endpoint.body?.type === "json"
-          ? `body: JSON.stringify(${JSON.stringify(body, null, 4)}),`
-          : `body: formData, // FormData with: ${Object.keys(body as FormData).join(", ")}`
+          ? `body: JSON.stringify(${JSON.stringify(body, null, 2)}),`
+          : `body: formData, // FormData with: ${endpoint.body?.fields.map((f) => f.name).join(", ")}`
       }`
           : ""
       }
@@ -164,30 +173,7 @@ async function call${endpoint.method.toLowerCase()}() {
   } catch (error) {
     console.error('Error:', error)
   }
-}
-
-// Using Promises
-fetch("${generateUrl()}", {
-  method: "${endpoint.method}",
-  headers: ${JSON.stringify(headers, null, 4)},${
-    body
-      ? `
-  ${
-    endpoint.body?.type === "json"
-      ? `body: JSON.stringify(${JSON.stringify(body, null, 4)}),`
-      : `body: formData, // FormData with: ${Object.keys(body as FormData).join(", ")}`
-  }`
-      : ""
-  }
-})
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(\`HTTP error! status: \${response.status}\`)
-    }
-    return response.json()
-  })
-  .then(data => console.log(data))
-  .catch(error => console.error('Error:', error))`
+}`
   }
 
   const generatePHP = () => {
@@ -197,119 +183,58 @@ fetch("${generateUrl()}", {
     return `<?php
 
 use GuzzleHttp\\Client;
-use GuzzleHttp\\Exception\\GuzzleException;
 
-class ApiClient {
-    private $client;
-    private $apiKey;
+$client = new Client([
+    'base_uri' => '${getBaseUrl()}',
+    'headers' => ${JSON.stringify(headers, null, 2).replace(/"/g, "'")}
+]);
 
-    public function __construct(string $apiKey) {
-        $this->client = new Client([
-            'base_uri' => 'https://store.homey.community',
-            'headers' => [
-                'Authorization' => 'Bearer ' . $apiKey
-            ]
-        ]);
-        $this->apiKey = $apiKey;
-    }
-
-    public function ${endpoint.method.toLowerCase()}${endpoint.path
-      .split("/")
-      .map((part) =>
-        part.startsWith(":")
-          ? part.slice(1).replace(/^\w/, (c) => c.toUpperCase())
-          : ""
-      )
-      .join(
-        ""
-      )}(${endpoint.params?.map((param) => `string $${param.name}`).join(", ") || ""}${
-      endpoint.params && endpoint.body ? ", " : ""
-    }${
-      endpoint.body?.fields
-        .map(
-          (field) =>
-            `${field.type.toLowerCase() === "file" ? "string" : "string"} $${field.name}`
-        )
-        .join(", ") || ""
-    }) {
-        try {
-            $response = $this->client->request("${endpoint.method}", "${endpoint.path}", [
-                "headers" => ${JSON.stringify(headers, null, 4).replace(/"/g, "'")},${
-                  body
-                    ? `
-                ${
-                  endpoint.body?.type === "json"
-                    ? `"json" => ${JSON.stringify(body, null, 4).replace(/"/g, "'")},`
-                    : `"multipart" => [
-                    ${Object.entries(body as FormData)
-                      .map(
-                        ([key]) => `["name" => "${key}", "contents" => $${key}]`
-                      )
-                      .join(",\n                    ")}
-                ],`
-                }`
-                    : ""
-                }
-            ]);
-
-            return json_decode($response->getBody(), true);
-        } catch (GuzzleException $e) {
-            throw new Exception("API request failed: " . $e->getMessage());
-        }
-    }
-}
-
-// Usage example
 try {
-    $client = new ApiClient("<your_api_key>");
-    $result = $client->${endpoint.method.toLowerCase()}${endpoint.path
-      .split("/")
-      .map((part) =>
-        part.startsWith(":")
-          ? part.slice(1).replace(/^\w/, (c) => c.toUpperCase())
-          : ""
-      )
-      .join(
-        ""
-      )}(${endpoint.params?.map((param) => `"example_${param.name}"`).join(", ") || ""}${
-      endpoint.params && endpoint.body ? ", " : ""
-    }${
-      endpoint.body?.fields
-        .map((field) => `"example_${field.name}"`)
-        .join(", ") || ""
+    $response = $client->request('${endpoint.method}', '${endpoint.path}',${
+      body && endpoint.body
+        ? ` [
+        ${
+          endpoint.body.type === "json"
+            ? `'json' => ${JSON.stringify(body, null, 2).replace(/"/g, "'")}`
+            : `'multipart' => [
+            ${endpoint.body.fields
+              .map(
+                (field) =>
+                  `['name' => '${field.name}', 'contents' => '${bodyValues[field.name] || `example_${field.name}`}']`
+              )
+              .join(",\n            ")}
+        ]`
+        }
+    ]`
+        : ""
     });
-    print_r($result);
+
+    $data = json_decode($response->getBody(), true);
+    print_r($data);
 } catch (Exception $e) {
     echo "Error: " . $e->getMessage();
 }`
   }
 
   const generateCurl = () => {
+    const headers = getHeaders()
+    const body = getBody()
+
     let curl = `curl -X ${endpoint.method} '${generateUrl()}'`
 
     // Add headers
-    endpoint.headers.forEach((header) => {
-      const value =
-        header.name === "Authorization"
-          ? `Bearer ${apiKey || "<api_key>"}`
-          : header.value
-      curl += `\n  -H '${header.name}: ${value}'`
+    Object.entries(headers).forEach(([name, value]) => {
+      curl += `\n  -H '${name}: ${value}'`
     })
 
     // Add body if needed
-    if (endpoint.body) {
-      if (endpoint.body.type === "json") {
-        const jsonBody = endpoint.body.fields.reduce(
-          (acc, field) => {
-            acc[field.name] = bodyValues[field.name] || ""
-            return acc
-          },
-          {} as Record<string, string>
-        )
-        curl += `\n  -d '${JSON.stringify(jsonBody, null, 2)}'`
-      } else if (endpoint.body.type === "formData") {
+    if (body) {
+      if (endpoint.body?.type === "json") {
+        curl += `\n  -d '${JSON.stringify(body, null, 2)}'`
+      } else if (endpoint.body?.type === "formData") {
         endpoint.body.fields.forEach((field) => {
-          curl += `\n  -F '${field.name}=${bodyValues[field.name] || ""}'`
+          const value = bodyValues[field.name] || `example_${field.name}`
+          curl += `\n  -F '${field.name}=${value}'`
         })
       }
     }

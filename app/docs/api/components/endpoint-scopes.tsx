@@ -23,11 +23,6 @@ export function EndpointScopes({ scopes }: EndpointScopesProps) {
               className={scopeConfig?.indent ? "ml-4" : ""}
             >
               {scope}
-              {scopeConfig?.indent && (
-                <span className="ml-1 text-xs text-muted-foreground">
-                  (required)
-                </span>
-              )}
             </Badge>
           )
         })}

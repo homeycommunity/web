@@ -1,17 +1,17 @@
 "use client"
 
 import { useState } from "react"
-import { Loader2, PlayCircle } from "lucide-react"
-
-import { apiEndpoints } from "@/config/api-endpoints"
-import { cn } from "@/lib/utils"
 import {
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
-import { Button } from "@/components/ui/button"
+} from "components/ui/accordion"
+import { Button } from "components/ui/button"
+import { cn } from "lib/utils"
+import { Loader2, PlayCircle } from "lucide-react"
 
+import { TransformedEndpoint } from "../lib/fetch-openapi"
+import { getBaseUrl } from "../lib/get-base-url"
 import { Badge } from "./badge"
 import { CodeExamples } from "./code-examples"
 import { EndpointBody } from "./endpoint-body"
@@ -22,7 +22,7 @@ import { EndpointScopes } from "./endpoint-scopes"
 import { ResponseDisplay } from "./response-display"
 
 interface EndpointDocsProps {
-  endpoint: (typeof apiEndpoints)[0]
+  endpoint: TransformedEndpoint
   index: number
   apiKey: string
   paramValues: Record<string, string>
@@ -50,9 +50,9 @@ export function EndpointDocs({
   const generateUrl = () => {
     let url = endpoint.path
     Object.entries(paramValues).forEach(([key, value]) => {
-      url = url.replace(`:${key}`, value || `:${key}`)
+      url = url.replace(`{${key}}`, value || `:${key}`)
     })
-    return `https://store.homey.community${url}`
+    return `${getBaseUrl()}${url}`
   }
 
   const testEndpoint = async () => {
@@ -76,7 +76,7 @@ export function EndpointDocs({
             ...acc,
             [header.name]:
               header.name === "Authorization"
-                ? `Bearer ${apiKey}`
+                ? `Bearer ${apiKey}` // Use real API key for actual request
                 : header.value,
           }),
           {}
@@ -136,12 +136,6 @@ export function EndpointDocs({
       </AccordionTrigger>
       <AccordionContent className="p-0">
         <div className="divide-y dark:divide-gray-800">
-          {testResponse && (
-            <div className="p-4 bg-muted/50">
-              <ResponseDisplay response={testResponse} />
-            </div>
-          )}
-
           <div className="p-4">
             <p className="text-sm text-muted-foreground">
               {endpoint.description}
@@ -171,7 +165,7 @@ export function EndpointDocs({
 
           <div className="p-4">
             <Button
-              variant="default"
+              variant="blue"
               size="default"
               className={cn(
                 "w-full",
@@ -190,8 +184,15 @@ export function EndpointDocs({
               Test Endpoint
             </Button>
           </div>
+          {testResponse && (
+            <div className="p-4 bg-muted/50">
+              <ResponseDisplay response={testResponse} />
+            </div>
+          )}
 
-          <EndpointResponses responses={endpoint.responses} />
+          {endpoint.responses?.length > 0 && (
+            <EndpointResponses responses={endpoint.responses} />
+          )}
 
           <CodeExamples
             endpoint={endpoint}
