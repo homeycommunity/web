@@ -50,8 +50,11 @@ export default async function ProfilePage() {
           </p>
         )}
         <HomeyConnectionForm isConnected={!!homeyToken} />
-        <p className="text-muted-foreground mt-4 text-sm">
-          Disclaimer: We do not store your email and password.
+        <p className="text-muted-foreground mt-4">
+          Note: This is a workaround until we get credentials for OAuth from Athom (Homey).
+        </p>
+        <p className="text-muted-foreground mt-4">
+          Disclaimer: We don&apos;t store your Athom (Homey) credentials.
         </p>
       </Card>
     </div>
