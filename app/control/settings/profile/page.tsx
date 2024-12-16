@@ -50,6 +50,9 @@ export default async function ProfilePage() {
           </p>
         )}
         <HomeyConnectionForm isConnected={!!homeyToken} />
+        <p className="text-muted-foreground mt-4 text-sm">
+          Disclaimer: We do not store your email and password.
+        </p>
       </Card>
     </div>
   )
