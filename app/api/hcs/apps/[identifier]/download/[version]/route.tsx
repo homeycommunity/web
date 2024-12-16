@@ -67,6 +67,7 @@ export const GET = requireAuth(
       headers: {
         "Content-Type": "application/gzip",
         "Content-Disposition": `attachment; filename="${app.identifier}.tar.gz"`,
+
         ...corsHeaders,
       },
     })

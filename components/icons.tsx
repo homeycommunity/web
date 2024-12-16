@@ -1,4 +1,6 @@
 import {
+  Download,
+  Loader2,
   LucideProps,
   Moon,
   SunMedium,
@@ -12,6 +14,8 @@ export const Icons = {
   sun: SunMedium,
   moon: Moon,
   twitter: Twitter,
+  spinner: Loader2,
+  download: Download,
   logo: (props: LucideProps) => (
     <svg
       width="48px"

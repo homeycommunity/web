@@ -14,6 +14,10 @@ export const siteConfig = {
       href: "/store",
     },
     {
+      title: "My Homeys",
+      href: "/control/homeys",
+    },
+    {
       title: "Download",
       href: "/download",
     },

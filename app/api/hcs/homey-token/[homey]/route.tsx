@@ -52,6 +52,9 @@ export const GET = requireAuth(
       return new Response(
         JSON.stringify({
           token: decryptedAccessToken,
+          localUrl: homey?.localUrl,
+          remoteUrl: homey?.remoteUrl,
+          remoteForwardedUrl: homey?.remoteForwardedUrl,
           sessionToken: decryptToken(homey?.sessionToken!, token.encryptionKey),
           expiresAt: token?.expires.getTime(),
           eventKey: homey?.eventKey,
