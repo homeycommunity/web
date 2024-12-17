@@ -6,6 +6,14 @@ import { useRouter } from "next/navigation"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { Button } from "components/ui/button"
 import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "components/ui/dialog"
+import {
   Form,
   FormControl,
   FormDescription,
@@ -35,6 +43,7 @@ export default function HomeyConnectionForm({
 }: HomeyConnectionFormProps) {
   const router = useRouter()
   const [isLoading, setIsLoading] = useState(false)
+  const [showDisconnectDialog, setShowDisconnectDialog] = useState(false)
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -86,6 +95,7 @@ export default function HomeyConnectionForm({
       }
 
       toast.success("Homey account disconnected successfully")
+      setShowDisconnectDialog(false)
       router.refresh()
     } catch (error) {
       console.error("Error disconnecting Homey account:", error)
@@ -115,12 +125,43 @@ export default function HomeyConnectionForm({
         </div>
         <Button
           variant="destructive"
-          onClick={handleDisconnect}
+          onClick={() => setShowDisconnectDialog(true)}
           disabled={isLoading}
           className="w-full"
         >
           {isLoading ? "Disconnecting..." : "Disconnect Homey Account"}
         </Button>
+
+        <Dialog
+          open={showDisconnectDialog}
+          onOpenChange={setShowDisconnectDialog}
+        >
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Disconnect Homey Account</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to disconnect your Homey account? This
+                will remove access to your devices and apps.
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <Button
+                variant="outline"
+                onClick={() => setShowDisconnectDialog(false)}
+                disabled={isLoading}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={handleDisconnect}
+                disabled={isLoading}
+              >
+                {isLoading ? "Disconnecting..." : "Disconnect"}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     )
   }
