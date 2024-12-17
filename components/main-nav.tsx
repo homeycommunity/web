@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { Menu } from "lucide-react"
+import { Session } from "next-auth"
 
 import { siteConfig } from "../config/site"
 import { cn } from "../lib/utils"
@@ -18,9 +19,7 @@ interface MainNavProps {
   items?: NavItem[]
 }
 interface SessionMenuProps {
-  session: {
-    name?: string | null
-  }
+  session: Session | null
 }
 
 export function MainNav({ items, session }: MainNavProps & SessionMenuProps) {
