@@ -16,6 +16,7 @@ export const siteConfig = {
     {
       title: "My Homeys",
       href: "/control/homeys",
+      needsAuth: true,
     },
     {
       title: "Download",
@@ -24,6 +25,7 @@ export const siteConfig = {
     {
       title: "API Docs",
       href: "/docs/api",
+      disabled: true,
     },
   ],
   links: {

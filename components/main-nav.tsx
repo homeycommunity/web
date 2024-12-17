@@ -17,8 +17,13 @@ import {
 interface MainNavProps {
   items?: NavItem[]
 }
+interface SessionMenuProps {
+  session: {
+    name?: string | null
+  }
+}
 
-export function MainNav({ items }: MainNavProps) {
+export function MainNav({ items, session }: MainNavProps & SessionMenuProps) {
   return (
     <div className="flex gap-4 md:gap-8">
       <Link href="/" className="flex items-center space-x-2">
@@ -43,7 +48,9 @@ export function MainNav({ items }: MainNavProps) {
             >
               {items.map(
                 (item, index) =>
-                  item.href && (
+                  item.href &&
+                  (!item.needsAuth || session) &&
+                  !item.disabled && (
                     <DropdownMenuItem key={index} asChild>
                       <Link
                         href={item.href}
@@ -68,7 +75,9 @@ export function MainNav({ items }: MainNavProps) {
         <nav className="hidden md:flex gap-6">
           {items?.map(
             (item, index) =>
-              item.href && (
+              item.href &&
+              (!item.needsAuth || session) &&
+              !item.disabled && (
                 <Link
                   key={index}
                   href={item.href}

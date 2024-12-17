@@ -4,4 +4,5 @@ export interface NavItem {
   target?: string
   disabled?: boolean
   external?: boolean
+  needsAuth?: boolean
 }
