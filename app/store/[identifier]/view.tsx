@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { Fragment, useState } from "react"
 import { useConnectionMultiple } from "@/effects/useConnectionMultiple"
 import { App, AppVersion, Homey, User } from "@prisma/client"
 import {
@@ -43,6 +43,7 @@ export function StoreIdentifierView({
   const downloadApp = async (url: string, homeyId: string) => {
     try {
       setIsInstalling(true)
+      toast.info(`Installing ${app.name} app on Homey`)
       // Get Homey
       const homeyResponse = await fetch(`/api/hcs/homey-token/${homeyId}`, {
         method: "GET",
@@ -77,13 +78,13 @@ export function StoreIdentifierView({
       })
 
       if (!response.ok) {
-        throw new Error("Failed to install Homey Community Store")
+        throw new Error("Failed to install " + app.name)
       }
 
-      toast.success("Successfully installed Homey Community Store")
+      toast.success("Successfully installed " + app.name)
     } catch (error) {
       console.error("Installation error:", error)
-      toast.error("Failed to install Homey Community Store")
+      toast.error("Failed to install " + app.name)
     } finally {
       setIsInstalling(false)
     }
@@ -135,32 +136,40 @@ export function StoreIdentifierView({
             <CardContent>
               <div className="flex flex-wrap gap-4">
                 {homeys.map((homey) => (
-                  <Button
-                    key={homey.id}
-                    variant="blue"
-                    onClick={() => {
-                      fetch(
-                        "/store/" +
-                          app.identifier +
-                          "/install/" +
-                          homey.id +
-                          "?version=" +
-                          app.versions[0].version,
-                        {
-                          method: "POST",
-                        }
-                      ).then(() => {
-                        toast.info("App installed", {
-                          description:
-                            "The app has been installed on your Homey",
-                        })
-                      })
-                    }}
-                    className="bg-gradient-to-r from-blue-600 to-blue-500 transition-all hover:from-blue-500 hover:to-blue-600"
-                  >
-                    <Download className="mr-2 size-4" />
-                    Install on {homey.name} via HCS Companion App
-                  </Button>
+                  <Fragment key={homey.id}>
+                    {(homey.apps as { id: string }[])?.find(
+                      (app: { id: string }) =>
+                        app.id === "space.homeycommunity.app"
+                    ) ? (
+                      <Button
+                        variant="blue"
+                        onClick={() => {
+                          fetch(
+                            "/store/" +
+                              app.identifier +
+                              "/install/" +
+                              homey.id +
+                              "?version=" +
+                              app.versions[0].version,
+                            {
+                              method: "POST",
+                            }
+                          ).then(() => {
+                            toast.info("App installed", {
+                              description:
+                                "The app has been installed on your Homey",
+                            })
+                          })
+                        }}
+                        className="bg-gradient-to-r from-blue-600 to-blue-500 transition-all hover:from-blue-500 hover:to-blue-600"
+                      >
+                        <Download className="mr-2 size-4" />
+                        Install on {homey.name} via HCS Companion App
+                      </Button>
+                    ) : (
+                      <></>
+                    )}
+                  </Fragment>
                 ))}
                 {homeysConnected
                   .filter((homey) => homey.isConnected)

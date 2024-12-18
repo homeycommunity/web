@@ -73,6 +73,10 @@ export function InstallHCS({ homeyId }: InstallHCSProps) {
     }
   }
 
+  const isInstalled = (homey?.apps as { id: string }[])?.find(
+    (app: { id: string }) => app.id === "space.homeycommunity.app"
+  )
+
   return (
     <div>
       <div className="flex items-center justify-between">
@@ -102,7 +106,7 @@ export function InstallHCS({ homeyId }: InstallHCSProps) {
             ) : (
               <>
                 <Icons.download className="mr-2 size-4" />
-                Install
+                {isInstalled ? "Reinstall" : "Install"}
               </>
             )}
           </Button>
