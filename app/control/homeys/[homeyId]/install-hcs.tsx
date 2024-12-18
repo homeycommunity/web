@@ -61,7 +61,7 @@ export function InstallHCS({ homeyId }: InstallHCSProps) {
         },
       })
 
-      const updateApp = await axios.post(
+      const updateApp = await axios.put(
         `${url}/api/manager/apps/app/space.homeycommunity.app`,
         {
           app: {

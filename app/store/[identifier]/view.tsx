@@ -78,7 +78,7 @@ export function StoreIdentifierView({
         },
       })
 
-      const updateApp = await axios.post(
+      const updateApp = await axios.put(
         `${url}/api/manager/apps/app/${app.identifier}`,
         {
           app: {
