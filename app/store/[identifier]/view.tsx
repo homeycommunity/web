@@ -81,10 +81,8 @@ export function StoreIdentifierView({
       const updateApp = await axios.put(
         `${url}/api/manager/apps/app/${app.identifier}`,
         {
-          app: {
-            origin: "homey_community_space",
-            channel: "test",
-          },
+          origin: "homeycommunityspace",
+          channel: "test",
         },
         { headers: { Authorization: `Bearer ${homey.sessionToken}` } }
       )
