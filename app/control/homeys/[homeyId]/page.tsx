@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card"
 import { Separator } from "@/components/ui/separator"
 
+import { AppsList } from "./apps-list"
 import { InstallHCS } from "./install-hcs"
 
 interface PageProps {
@@ -31,7 +32,7 @@ export default async function Page({ params: paramsPromise }: PageProps) {
           <CardContent>
             <InstallHCS homeyId={params.homeyId} />
             <Separator className="my-4" />
-            {/* Future: List of installed apps */}
+            <AppsList homeyId={params.homeyId} />
           </CardContent>
         </Card>
       </div>

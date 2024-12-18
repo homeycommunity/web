@@ -93,6 +93,7 @@ model Homey {
   userId             String? @map("user_id")
   eventKey           String? @map("event_key")
   sessionToken       String? @map("session_token") @db.Text
+  apps               Json?
 
   @@unique([homeyId, userId])
   @@map("homey")

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server"
+import axios from "axios"
 import { connect } from "emitter-io"
 
 import { prisma } from "@/lib/prisma"
@@ -131,13 +132,31 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
         input.token.access_token,
         homey.remoteUrl!
       )
+      const listApps = await axios.get(
+        `${homey?.remoteUrl}/api/manager/apps/app`,
+        {
+          headers: {
+            Authorization: `Bearer ${sessionToken}`,
+          },
+        }
+      )
 
+      const apps = Object.entries(listApps.data).map(
+        ([key, app]: [string, any]) => {
+          return {
+            id: key,
+            name: app.name,
+            versions: app.version,
+          }
+        }
+      )
       await prisma.homey.update({
         where: {
           id: homey.id,
         },
         data: {
           sessionToken: encryptToken(sessionToken, encryptionKey),
+          apps: apps,
         },
       })
     })

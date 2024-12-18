@@ -1,43 +1,45 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { Wifi } from "lucide-react"
+import { useConnection } from "@/effects/useConnection"
+import { icons } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
 interface ConnectionStatusProps {
-  url: string
+  urls: string | string[]
   className?: string
+  label: string
+  icon: keyof typeof icons
 }
 
-export function ConnectionStatus({ url, className }: ConnectionStatusProps) {
-  const [isConnected, setIsConnected] = useState(false)
+const Icon = ({
+  name,
+  color,
+  size,
+  className,
+}: {
+  name: string
+  color?: string
+  size?: number
+  className?: string
+}) => {
+  const LucideIcon = icons[name as keyof typeof icons]
 
-  useEffect(() => {
-    const checkConnection = async () => {
-      try {
-        const controller = new AbortController()
-        const timeoutId = setTimeout(() => controller.abort(), 2000) // 2s timeout
+  return <LucideIcon color={color} size={size} className={className} />
+}
 
-        const response = await fetch(url, {
-          signal: controller.signal,
-          mode: "no-cors", // Since we just want to check if it's reachable
-        })
+export function ConnectionStatus({
+  urls,
+  className,
+  icon,
+  label,
+}: ConnectionStatusProps) {
+  const { isConnected, workingUrl } = useConnection(urls)
 
-        clearTimeout(timeoutId)
-        setIsConnected(true)
-      } catch (error) {
-        setIsConnected(false)
-      }
-    }
-
-    if (url) {
-      checkConnection()
-      // Check connection every 30 seconds
-      const interval = setInterval(checkConnection, 60000)
-      return () => clearInterval(interval)
-    }
-  }, [url])
+  if (!isConnected)
+    return (
+      <span className="text-muted-foreground">No connection to {label}</span>
+    )
 
   return (
     <div
@@ -46,16 +48,16 @@ export function ConnectionStatus({ url, className }: ConnectionStatusProps) {
         className
       )}
     >
-      <Wifi
+      <Icon
+        name={icon}
         className={cn(
           "h-4 w-4",
           isConnected ? "text-green-500" : "text-muted-foreground"
         )}
       />
-      <span>Local URL: {url}</span>
-      {isConnected && (
-        <span className="text-green-500 text-xs">(Connected)</span>
-      )}
+      <span>
+        {label}: {workingUrl}
+      </span>
     </div>
   )
 }

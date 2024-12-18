@@ -100,12 +100,32 @@ export async function GET(request: Request) {
             accessToken,
             homey.remoteUrl!
           )
+          const listApps = await axios.get(
+            `${homey?.remoteUrl}/api/manager/apps/app`,
+            {
+              headers: {
+                Authorization: `Bearer ${sessionToken}`,
+              },
+            }
+          )
+
+          const apps = Object.entries(listApps.data).map(
+            ([key, app]: [string, any]) => {
+              return {
+                id: key,
+                name: app.name,
+                versions: app.version,
+              }
+            }
+          )
+
           await prisma.homey.update({
             where: {
               id: homey.id,
             },
             data: {
               sessionToken: encryptToken(sessionToken, newEncryptionKey!),
+              apps: apps,
             },
           })
         })

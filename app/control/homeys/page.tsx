@@ -2,7 +2,7 @@ import { Metadata } from "next"
 import Link from "next/link"
 import { redirect } from "next/navigation"
 import { auth } from "@/auth"
-import { ArrowRight, ForwardIcon, Globe } from "lucide-react"
+import { ArrowRight, Globe } from "lucide-react"
 
 import { prisma } from "@/lib/prisma"
 import { Button } from "@/components/ui/button"
@@ -65,13 +65,14 @@ export default async function HomeysPage() {
               <div className="space-y-4">
                 <h2 className="text-xl font-semibold">{homey.name}</h2>
                 <div className="space-y-2">
-                  {homey.localUrl && <ConnectionStatus url={homey.localUrl} />}
-                  {homey.remoteForwardedUrl && (
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <ForwardIcon className="h-4 w-4" />
-                      <span>Remote URL: {homey.remoteForwardedUrl}</span>
-                    </div>
-                  )}
+                  <ConnectionStatus
+                    label="Direct URL"
+                    urls={[homey.localUrl, homey.remoteForwardedUrl].filter(
+                      (e) => e !== null
+                    )}
+                    icon={"Wifi"}
+                  />
+
                   {homey.remoteUrl && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Globe className="h-4 w-4" />
