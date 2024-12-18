@@ -7,7 +7,7 @@ import { decryptToken } from "@/lib/token-encryption"
 
 import { AuthenticatedRequest, requireAuth } from "../../middleware"
 
-export const POST = requireAuth<AuthenticatedRequest>(async (req) => {
+export const POST = requireAuth(async (req: AuthenticatedRequest) => {
   try {
     const token = await prisma.homeyToken.findFirst({
       where: { userId: req.auth.user.id },
