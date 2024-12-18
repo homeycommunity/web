@@ -15,9 +15,10 @@ import {
 interface HomeyApp {
   id: string
   name: string
-  versions: string
-  sdk: number
-  compatibility: string
+  version: string
+  origin: string
+  channel: string
+  autoUpdate: boolean
 }
 
 interface AppsListProps {
@@ -70,13 +71,19 @@ export function AppsList({ homeyId }: AppsListProps) {
           <TableRow>
             <TableHead>Name</TableHead>
             <TableHead>Version</TableHead>
+            <TableHead>Origin</TableHead>
+            <TableHead>Channel</TableHead>
+            <TableHead>Auto Update</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {apps.map((app) => (
             <TableRow key={app.id}>
               <TableCell>{app.name}</TableCell>
-              <TableCell>{app.versions}</TableCell>
+              <TableCell>{app.version}</TableCell>
+              <TableCell>{app.origin}</TableCell>
+              <TableCell>{app.channel}</TableCell>
+              <TableCell>{app.autoUpdate ? "Yes" : "No"}</TableCell>
             </TableRow>
           ))}
         </TableBody>

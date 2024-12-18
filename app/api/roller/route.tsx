@@ -114,7 +114,10 @@ export async function GET(request: Request) {
               return {
                 id: key,
                 name: app.name,
-                versions: app.version,
+                version: app.version,
+                origin: app.origin,
+                channel: app.channel,
+                autoUpdate: app.autoupdate,
               }
             }
           )

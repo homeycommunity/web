@@ -15,6 +15,7 @@ export const GET = requireAuth(
     if (!homey) {
       return Response.json({ error: "Homey not found" }, { status: 404 })
     }
+
     const { sessionToken, eventKey, ...homeyWithoutSensitiveData } = homey
 
     return Response.json({ homey: homeyWithoutSensitiveData })

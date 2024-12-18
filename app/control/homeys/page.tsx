@@ -9,6 +9,8 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { ConnectionStatus } from "@/components/connection-status"
 
+import { RefreshHomeys } from "./refresh-homeys"
+
 export const metadata: Metadata = {
   title: "My Homeys",
   description: "Manage your connected Homey devices",
@@ -51,12 +53,15 @@ export default async function HomeysPage() {
   }
 
   return (
-    <div className="container max-w-2xl py-6 space-y-6">
-      <div className="space-y-2">
-        <h1 className="text-3xl font-bold">My Homeys</h1>
-        <p className="text-muted-foreground">
-          Manage your connected Homey devices
-        </p>
+    <div className="container max-w-2xl space-y-6 py-6">
+      <div className="flex items-center justify-between">
+        <div className="space-y-2">
+          <h1 className="text-3xl font-bold">My Homeys</h1>
+          <p className="text-muted-foreground">
+            Manage your connected Homey devices
+          </p>
+        </div>
+        <RefreshHomeys />
       </div>
       <div className="grid gap-4">
         {homeys.map((homey) => (
@@ -75,7 +80,7 @@ export default async function HomeysPage() {
 
                   {homey.remoteUrl && (
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Globe className="h-4 w-4" />
+                      <Globe className="size-4" />
                       <span>Remote URL: {homey.remoteUrl}</span>
                     </div>
                   )}
@@ -83,7 +88,7 @@ export default async function HomeysPage() {
               </div>
               <Button variant="ghost" size="icon" asChild>
                 <Link href={`/control/homeys/${homey.homeyId}`}>
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="size-4" />
                   <span className="sr-only">View Homey details</span>
                 </Link>
               </Button>

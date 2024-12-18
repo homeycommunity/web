@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { useConnection } from "@/effects/useConnection"
 import { useHomey } from "@/effects/useHomey"
+import axios from "axios"
 import { toast } from "sonner"
 
 import { Button } from "@/components/ui/button"
@@ -59,6 +60,17 @@ export function InstallHCS({ homeyId }: InstallHCSProps) {
           Authorization: `Bearer ${homey.sessionToken}`,
         },
       })
+
+      const updateApp = await axios.post(
+        `${url}/api/manager/apps/app/space.homeycommunity.app`,
+        {
+          app: {
+            origin: "homey_community_space",
+            channel: "test",
+          },
+        },
+        { headers: { Authorization: `Bearer ${homey.sessionToken}` } }
+      )
 
       if (!response.ok) {
         throw new Error("Failed to install Homey Community Store")

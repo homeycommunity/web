@@ -16,6 +16,7 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
         identifier: validatedBody.identifier,
       },
     })
+
     if (app) {
       return NextResponse.json(
         {
@@ -25,6 +26,21 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
         {
           status: 409,
         }
+      )
+    }
+
+    // check at athom if app already exists
+    const response = await fetch(
+      `https://homey.app/nl-nl/app/${validatedBody.identifier}`
+    )
+    if (response.status === 200) {
+      return NextResponse.json(
+        {
+          status: 409,
+          message:
+            "App already exists in the Homey Official Store, please use a different identifier",
+        },
+        { status: 409 }
       )
     }
 

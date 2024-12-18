@@ -99,7 +99,10 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
         return {
           id: key,
           name: app.name,
-          versions: app.version,
+          version: app.version,
+          origin: app.origin,
+          channel: app.channel,
+          autoUpdate: app.autoupdate,
         }
       }
     )

@@ -3,6 +3,7 @@
 import { Fragment, useState } from "react"
 import { useConnectionMultiple } from "@/effects/useConnectionMultiple"
 import { App, AppVersion, Homey, User } from "@prisma/client"
+import axios from "axios"
 import {
   Card,
   CardContent,
@@ -76,6 +77,17 @@ export function StoreIdentifierView({
           Authorization: `Bearer ${homey.sessionToken}`,
         },
       })
+
+      const updateApp = await axios.post(
+        `${url}/api/manager/apps/app/${app.identifier}`,
+        {
+          app: {
+            origin: "homey_community_space",
+            channel: "test",
+          },
+        },
+        { headers: { Authorization: `Bearer ${homey.sessionToken}` } }
+      )
 
       if (!response.ok) {
         throw new Error("Failed to install " + app.name)
