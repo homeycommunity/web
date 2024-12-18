@@ -64,7 +64,7 @@ export function InstallHCS({ homeyId }: InstallHCSProps) {
       const updateApp = await axios.put(
         `${url}/api/manager/apps/app/space.homeycommunity.app`,
         {
-          origin: "homeycommunityspace",
+          origin: "homeycommunity_space",
           channel: "test",
         },
         { headers: { Authorization: `Bearer ${homey.sessionToken}` } }
