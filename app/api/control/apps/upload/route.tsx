@@ -4,6 +4,7 @@ import { Client } from "minio"
 import { tarGzGlob } from "targz-glob"
 
 import { prisma } from "@/lib/prisma"
+import { triggerAutoUpdate } from "@/lib/trigger-auto-update"
 import { requireAuth, type AuthenticatedRequest } from "@/app/api/middleware"
 
 export const dynamic = "force-dynamic"
@@ -124,6 +125,15 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
         approved: false,
         publishedAt: new Date(),
       },
+    })
+
+    triggerAutoUpdate(
+      appDb.identifier,
+      appVersion.version,
+      fileBlob,
+      envInfo
+    ).catch((e) => {
+      console.error("Error triggering auto update:", e)
     })
 
     return NextResponse.json(
