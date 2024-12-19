@@ -83,8 +83,8 @@ export function InstallHCS({ homeyId }: InstallHCSProps) {
     }
   }
 
-  const isInstalled = (homey?.apps as { id: string }[])?.find(
-    (app: { id: string }) => app.id === "space.homeycommunity.app"
+  const isInstalled = homey?.HomeyApp?.find(
+    (app) => app.appId === "space.homeycommunity.app"
   )
 
   return (

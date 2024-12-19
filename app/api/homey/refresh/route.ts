@@ -3,6 +3,7 @@ import axios from "axios"
 
 import { prisma } from "@/lib/prisma"
 import { getSessionTokenFromAccessToken } from "@/lib/session-token"
+import { storeApps } from "@/lib/store-apps"
 import { decryptToken } from "@/lib/token-encryption"
 
 import { AuthenticatedRequest, requireAuth } from "../../middleware"
@@ -92,19 +93,12 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
               version: app.version,
               origin: app.origin,
               channel: app.channel,
-              autoUpdate: app.autoupdate,
+              autoupdate: app.autoupdate,
             }
           }
         )
 
-        await prisma.homey.update({
-          where: {
-            id: homey.id,
-          },
-          data: {
-            apps: apps,
-          },
-        })
+        await storeApps(apps, homey.id)
       })
     )
 

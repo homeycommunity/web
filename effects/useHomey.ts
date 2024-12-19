@@ -1,8 +1,10 @@
-import { Homey } from "@prisma/client"
+import { Homey, HomeyApp } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 
 export function useHomey(homeyId: string): {
-  homey: Omit<Homey, "sessionToken" | "eventKey">
+  homey: Omit<Homey, "sessionToken" | "eventKey"> & {
+    HomeyApp: HomeyApp[]
+  }
   isLoading: boolean
 } {
   const homey = useQuery({

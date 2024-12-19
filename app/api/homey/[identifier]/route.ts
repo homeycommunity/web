@@ -11,6 +11,7 @@ export const GET = requireAuth(
 
     const homey = await prisma.homey.findFirst({
       where: { homeyId: identifier },
+      include: { HomeyApp: true },
     })
     if (!homey) {
       return Response.json({ error: "Homey not found" }, { status: 404 })

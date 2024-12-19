@@ -1,5 +1,6 @@
 "use client"
 
+import { Homey, HomeyApp } from "@prisma/client"
 import { useQuery } from "@tanstack/react-query"
 import axios from "axios"
 
@@ -11,15 +12,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-
-interface HomeyApp {
-  id: string
-  name: string
-  version: string
-  origin: string
-  channel: string
-  autoUpdate: boolean
-}
 
 interface AppsListProps {
   homeyId: string
@@ -33,10 +25,10 @@ export function AppsList({ homeyId }: AppsListProps) {
   } = useQuery({
     queryKey: ["homey-apps", homeyId],
     queryFn: async () => {
-      const response = await axios.get<{ homey: { apps: HomeyApp[] } }>(
-        `/api/homey/${homeyId}`
-      )
-      return response.data.homey.apps
+      const response = await axios.get<{
+        homey: Homey & { HomeyApp: HomeyApp[] }
+      }>(`/api/homey/${homeyId}`)
+      return response.data.homey.HomeyApp
     },
   })
 
@@ -78,7 +70,7 @@ export function AppsList({ homeyId }: AppsListProps) {
         </TableHeader>
         <TableBody>
           {apps.map((app) => (
-            <TableRow key={app.id}>
+            <TableRow key={app.appId}>
               <TableCell>{app.name}</TableCell>
               <TableCell>{app.version}</TableCell>
               <TableCell>{app.origin}</TableCell>

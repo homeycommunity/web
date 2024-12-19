@@ -2,7 +2,7 @@
 
 import { Fragment, useState } from "react"
 import { useConnectionMultiple } from "@/effects/useConnectionMultiple"
-import { App, AppVersion, Homey, User } from "@prisma/client"
+import { App, AppVersion, Homey, HomeyApp, User } from "@prisma/client"
 import axios from "axios"
 import {
   Card,
@@ -32,7 +32,7 @@ export function StoreIdentifierView({
   homeys,
 }: {
   app: App & { versions: AppVersion[]; author: User }
-  homeys: Homey[]
+  homeys: (Homey & { HomeyApp: HomeyApp[] })[]
 }) {
   const currentVersion = app.versions[0]
   const appInfo = currentVersion.appinfo as unknown as AppInfo
@@ -147,9 +147,8 @@ export function StoreIdentifierView({
               <div className="flex flex-wrap gap-4">
                 {homeys.map((homey) => (
                   <Fragment key={homey.id}>
-                    {(homey.apps as { id: string }[])?.find(
-                      (app: { id: string }) =>
-                        app.id === "space.homeycommunity.app"
+                    {homey.HomeyApp?.find(
+                      (_app) => _app.appId === "space.homeycommunity.app"
                     ) ? (
                       <Button
                         variant="blue"

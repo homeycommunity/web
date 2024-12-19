@@ -1,5 +1,5 @@
 import { auth } from "@/auth"
-import { Homey, PrismaClient } from "@prisma/client"
+import { Homey, HomeyApp, PrismaClient } from "@prisma/client"
 
 import { StoreIdentifierView } from "@/app/store/[identifier]/view"
 
@@ -13,7 +13,7 @@ export default async function StorePage({
   const params = await paramsPromise
   const prisma = new PrismaClient()
   const session = await auth()
-  let homeys: Homey[] = []
+  let homeys: (Homey & { HomeyApp: HomeyApp[] })[] = []
   if (session && session.user) {
     const user = await prisma.user.findUnique({
       where: {
@@ -23,6 +23,9 @@ export default async function StorePage({
     homeys = await prisma.homey.findMany({
       where: {
         userId: user?.id,
+      },
+      include: {
+        HomeyApp: true,
       },
     })
   }

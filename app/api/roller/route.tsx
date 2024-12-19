@@ -2,6 +2,7 @@ import { PrismaClient } from "@prisma/client"
 import axios from "axios"
 
 import { getSessionTokenFromAccessToken } from "@/lib/session-token"
+import { storeApps } from "@/lib/store-apps"
 import {
   decryptToken,
   encryptToken,
@@ -117,7 +118,7 @@ export async function GET(request: Request) {
                 version: app.version,
                 origin: app.origin,
                 channel: app.channel,
-                autoUpdate: app.autoupdate,
+                autoupdate: app.autoupdate,
               }
             }
           )
@@ -128,9 +129,9 @@ export async function GET(request: Request) {
             },
             data: {
               sessionToken: encryptToken(sessionToken, newEncryptionKey!),
-              apps: apps,
             },
           })
+          await storeApps(apps, homey.id)
         })
       )
     }
