@@ -31,6 +31,13 @@ interface EndpointDocsProps {
   onBodyChange: (name: string, value: string) => void
 }
 
+interface ApiResponse {
+  status: number
+  data: any
+  error?: string
+  headers?: Record<string, string>
+}
+
 export function EndpointDocs({
   endpoint,
   index,
@@ -41,18 +48,35 @@ export function EndpointDocs({
   onBodyChange,
 }: EndpointDocsProps) {
   const [isLoading, setIsLoading] = useState(false)
-  const [testResponse, setTestResponse] = useState<{
-    status: number
-    data: any
-    error?: string
-  } | null>(null)
+  const [testResponse, setTestResponse] = useState<ApiResponse | null>(null)
 
   const generateUrl = () => {
-    let url = endpoint.path
-    Object.entries(paramValues).forEach(([key, value]) => {
-      url = url.replace(`{${key}}`, value || `:${key}`)
-    })
-    return `${getBaseUrl()}${url}`
+    try {
+      let url = endpoint.path
+      Object.entries(paramValues).forEach(([key, value]) => {
+        if (!value && endpoint.params?.find((p) => p.name === key)?.required) {
+          throw new Error(`Required parameter "${key}" is missing`)
+        }
+        url = url.replace(`{${key}}`, encodeURIComponent(value || `:${key}`))
+      })
+      return `${getBaseUrl()}${url}`
+    } catch (error) {
+      throw error instanceof Error ? error : new Error("Failed to generate URL")
+    }
+  }
+
+  const validateRequestBody = () => {
+    if (!endpoint.body) return true
+
+    const missingFields = endpoint.body.fields
+      .filter((field) => field.required && !bodyValues[field.name])
+      .map((field) => field.name)
+
+    if (missingFields.length > 0) {
+      throw new Error(`Required fields missing: ${missingFields.join(", ")}`)
+    }
+
+    return true
   }
 
   const testEndpoint = async () => {
@@ -69,43 +93,76 @@ export function EndpointDocs({
     setTestResponse(null)
 
     try {
-      const response = await fetch(generateUrl(), {
+      // Validate parameters and body before making request
+      const url = generateUrl()
+      validateRequestBody()
+
+      const requestHeaders: Record<string, string> = endpoint.headers.reduce(
+        (acc, header) => ({
+          ...acc,
+          [header.name]:
+            header.name === "Authorization" ? `Bearer ${apiKey}` : header.value,
+        }),
+        {} as Record<string, string>
+      )
+
+      let requestBody: BodyInit | undefined
+      if (endpoint.body) {
+        if (endpoint.body.type === "json") {
+          requestHeaders["Content-Type"] = "application/json"
+          requestBody = JSON.stringify(
+            endpoint.body.fields.reduce(
+              (acc, field) => ({
+                ...acc,
+                [field.name]: bodyValues[field.name] || "",
+              }),
+              {}
+            )
+          )
+        } else {
+          requestBody = Object.entries(bodyValues).reduce(
+            (formData, [key, value]) => {
+              formData.append(key, value)
+              return formData
+            },
+            new FormData()
+          )
+        }
+      }
+
+      const response = await fetch(url, {
         method: endpoint.method,
-        headers: endpoint.headers.reduce(
-          (acc, header) => ({
-            ...acc,
-            [header.name]:
-              header.name === "Authorization"
-                ? `Bearer ${apiKey}` // Use real API key for actual request
-                : header.value,
-          }),
-          {}
-        ),
-        body: endpoint.body
-          ? endpoint.body.type === "json"
-            ? JSON.stringify(
-                endpoint.body.fields.reduce(
-                  (acc, field) => ({
-                    ...acc,
-                    [field.name]: bodyValues[field.name] || "",
-                  }),
-                  {}
-                )
-              )
-            : Object.entries(bodyValues).reduce((formData, [key, value]) => {
-                formData.append(key, value)
-                return formData
-              }, new FormData())
-          : undefined,
+        headers: requestHeaders,
+        body: requestBody,
       })
 
-      const data = await response.json()
+      // Get response headers
+      const responseHeaders: Record<string, string> = {}
+      response.headers.forEach((value, key) => {
+        responseHeaders[key] = value
+      })
+
+      let data: any
+      const contentType = response.headers.get("content-type")
+
+      if (contentType?.includes("application/json")) {
+        try {
+          data = await response.json()
+        } catch (error) {
+          console.warn("Failed to parse JSON response:", error)
+          data = await response.text()
+        }
+      } else {
+        data = await response.text()
+      }
 
       setTestResponse({
         status: response.status,
         data,
+        headers: responseHeaders,
       })
     } catch (error) {
+      console.error("API test error:", error)
       setTestResponse({
         status: 500,
         data: null,
@@ -120,16 +177,19 @@ export function EndpointDocs({
     <AccordionItem
       value={`item-${index}`}
       className={cn(
-        "mb-3 border rounded-lg overflow-hidden bg-card transition-shadow",
-        testResponse && "ring-1 ring-primary"
+        "mb-3 overflow-hidden rounded-lg border bg-card transition-shadow",
+        testResponse &&
+          (testResponse.error
+            ? "ring-1 ring-destructive"
+            : "ring-1 ring-primary")
       )}
     >
       <AccordionTrigger className="px-4 py-3 hover:no-underline data-[state=open]:border-b">
-        <div className="flex items-center gap-4 w-full">
+        <div className="flex w-full items-center gap-4">
           <Badge variant="method" type={endpoint.method.toLowerCase() as any}>
             {endpoint.method}
           </Badge>
-          <code className="text-base font-mono text-foreground/80">
+          <code className="font-mono text-base text-foreground/80">
             {endpoint.path}
           </code>
         </div>
@@ -165,11 +225,11 @@ export function EndpointDocs({
 
           <div className="p-4">
             <Button
-              variant="blue"
+              variant={testResponse?.error ? "destructive" : "blue"}
               size="default"
               className={cn(
                 "w-full",
-                isLoading && "opacity-50 pointer-events-none"
+                isLoading && "pointer-events-none opacity-50"
               )}
               onClick={() => {
                 if (!isLoading) testEndpoint()
@@ -177,15 +237,16 @@ export function EndpointDocs({
               disabled={isLoading}
             >
               {isLoading ? (
-                <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                <Loader2 className="mr-2 size-4 animate-spin" />
               ) : (
-                <PlayCircle className="h-4 w-4 mr-2" />
+                <PlayCircle className="mr-2 size-4" />
               )}
-              Test Endpoint
+              {isLoading ? "Testing..." : "Test Endpoint"}
             </Button>
           </div>
+
           {testResponse && (
-            <div className="p-4 bg-muted/50">
+            <div className="bg-muted/50 p-4">
               <ResponseDisplay response={testResponse} />
             </div>
           )}

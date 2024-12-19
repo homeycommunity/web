@@ -16,6 +16,7 @@ const apiScopeSchema = z.enum([
   "write:apps",
   "read:versions",
   "write:versions",
+  "homey:apps",
   "homey:devices",
   "homey:flows",
 ]) satisfies z.ZodType<ApiScope>

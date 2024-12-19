@@ -11,7 +11,7 @@ import { auth } from "../../_middleware/auth"
 const app = new Hono()
 
 app.get(
-  "/app/:identifier",
+  "/:identifier",
   describeRoute({
     tags: ["version"],
     summary: "Get app versions for a specific app",

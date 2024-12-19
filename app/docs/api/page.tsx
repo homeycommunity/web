@@ -33,14 +33,27 @@ export default function ApiDocsPage() {
   useEffect(() => {
     async function loadOpenAPISpec() {
       try {
+        setIsLoading(true)
+        setError(null)
         const spec = await fetchOpenAPISpec()
+
+        if (!spec || !spec.paths) {
+          throw new Error("Invalid OpenAPI specification received")
+        }
+
         const transformedEndpoints = transformOpenAPIToEndpoints(spec)
+
+        if (!transformedEndpoints.length) {
+          throw new Error("No endpoints found in the API specification")
+        }
+
         setEndpoints(transformedEndpoints)
       } catch (err) {
+        console.error("Failed to load API documentation:", err)
         setError(
           err instanceof Error
             ? err.message
-            : "Failed to load API documentation"
+            : "Failed to load API documentation. Please try again later."
         )
       } finally {
         setIsLoading(false)
@@ -91,22 +104,25 @@ export default function ApiDocsPage() {
   if (error) {
     return (
       <main className="container py-6">
-        <div className="flex items-center justify-center">
+        <div className="flex flex-col items-center justify-center gap-4">
           <p className="text-red-500">Error: {error}</p>
+          <Button variant="outline" onClick={() => window.location.reload()}>
+            Retry
+          </Button>
         </div>
       </main>
     )
   }
 
   return (
-    <main className="container py-6 space-y-6">
+    <main className="container space-y-6 py-6">
       {/* Header */}
       <div className="flex justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">
             API Documentation
           </h1>
-          <p className="text-muted-foreground mt-2">
+          <p className="mt-2 text-muted-foreground">
             Explore and test the Homey Store API endpoints directly in your
             browser.
           </p>
@@ -117,13 +133,13 @@ export default function ApiDocsPage() {
       <Card>
         <CardHeader className="pb-3">
           <div className="flex items-center gap-2">
-            <Lock className="h-4 w-4" />
+            <Lock className="size-4" />
             <h2 className="text-lg font-semibold">Authentication</h2>
           </div>
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex gap-4 items-center">
+            <div className="flex items-center gap-4">
               <Input
                 placeholder="Enter your API key"
                 value={apiKey}
@@ -141,13 +157,13 @@ export default function ApiDocsPage() {
                 Clear
               </Button>
             </div>
-            <div className="flex items-start gap-4 p-4 rounded-lg bg-muted/50">
-              <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
+            <div className="flex items-start gap-4 rounded-lg bg-muted/50 p-4">
+              <Info className="mt-0.5 size-5 text-blue-600 dark:text-blue-400" />
               <div className="space-y-1">
                 <p className="text-sm font-medium">
                   Include this header in all API requests:
                 </p>
-                <code className="text-sm font-mono px-2 py-1 rounded bg-muted">
+                <code className="rounded bg-muted px-2 py-1 font-mono text-sm">
                   Authorization: Bearer {obfuscateApiKey(apiKey)}
                 </code>
               </div>
@@ -169,30 +185,36 @@ export default function ApiDocsPage() {
           </div>
         </CardHeader>
         <CardContent className="pt-0">
-          <Accordion
-            type="single"
-            collapsible
-            className="w-full"
-            value={expandedEndpoint}
-            onValueChange={(value) => setExpandedEndpoint(value || "")}
-          >
-            {endpoints.map((endpoint, index) => (
-              <EndpointDocs
-                key={index}
-                endpoint={endpoint}
-                index={index}
-                apiKey={apiKey}
-                paramValues={paramValues[index] || {}}
-                bodyValues={bodyValues[index] || {}}
-                onParamChange={(name, value) =>
-                  handleParamChange(index, name, value)
-                }
-                onBodyChange={(name, value) =>
-                  handleBodyChange(index, name, value)
-                }
-              />
-            ))}
-          </Accordion>
+          {endpoints.length === 0 ? (
+            <div className="flex items-center justify-center py-8">
+              <p className="text-muted-foreground">No endpoints available</p>
+            </div>
+          ) : (
+            <Accordion
+              type="single"
+              collapsible
+              className="w-full"
+              value={expandedEndpoint}
+              onValueChange={(value) => setExpandedEndpoint(value || "")}
+            >
+              {endpoints.map((endpoint, index) => (
+                <EndpointDocs
+                  key={index}
+                  endpoint={endpoint}
+                  index={index}
+                  apiKey={apiKey}
+                  paramValues={paramValues[index] || {}}
+                  bodyValues={bodyValues[index] || {}}
+                  onParamChange={(name, value) =>
+                    handleParamChange(index, name, value)
+                  }
+                  onBodyChange={(name, value) =>
+                    handleBodyChange(index, name, value)
+                  }
+                />
+              ))}
+            </Accordion>
+          )}
         </CardContent>
       </Card>
     </main>

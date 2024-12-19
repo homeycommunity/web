@@ -49,6 +49,12 @@ export const API_SCOPES = [
     indent: 0,
   },
   {
+    value: "homey:apps",
+    label: "Homey Apps",
+    description: "Manage Homey apps",
+    indent: 0,
+  },
+  {
     value: "homey:flows",
     label: "Homey Flows",
     description: "Trigger Homey flows",

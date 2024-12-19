@@ -2,8 +2,7 @@
 
 import { useState } from "react"
 import { Check, Copy } from "lucide-react"
-import { Prism as SyntaxHighlighter } from "react-syntax-highlighter"
-import { vscDarkPlus } from "react-syntax-highlighter/dist/cjs/styles/prism"
+import { highlight } from "sugar-high"
 
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
@@ -29,11 +28,13 @@ export function CodeBlock({
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const codeHTML = highlight(value as string)
+
   return (
-    <div className={cn("relative rounded-lg overflow-hidden", className)}>
+    <div className={cn("relative overflow-hidden rounded-lg", className)}>
       {title && (
-        <div className="absolute top-0 left-0 right-12 h-9 px-4 flex items-center bg-muted/80 backdrop-blur-sm border-b">
-          <span className="text-sm text-muted-foreground font-mono">
+        <div className="absolute left-0 right-12 top-0 flex h-9 items-center border-b bg-muted/80 px-4 backdrop-blur-sm">
+          <span className="font-mono text-sm text-muted-foreground">
             {title}
           </span>
         </div>
@@ -41,28 +42,22 @@ export function CodeBlock({
       <Button
         size="icon"
         variant="ghost"
-        className="absolute right-2 top-2 h-8 w-8 hover:bg-muted/80"
+        className="absolute right-2 top-2 size-8 hover:bg-muted/80"
         onClick={onCopy}
       >
         {copied ? (
-          <Check className="h-4 w-4 text-green-500" />
+          <Check className="size-4 text-green-500" />
         ) : (
-          <Copy className="h-4 w-4" />
+          <Copy className="size-4" />
         )}
         <span className="sr-only">Copy code</span>
       </Button>
-      <SyntaxHighlighter
-        language={language}
-        style={vscDarkPlus}
-        customStyle={{
-          margin: 0,
-          paddingTop: title ? "2.75rem" : "1rem",
-          borderRadius: "0.5rem",
-        }}
-        showLineNumbers={true}
-      >
-        {value}
-      </SyntaxHighlighter>
+      <div className="rounded-lg bg-gray-800 p-4">
+        <code
+          dangerouslySetInnerHTML={{ __html: codeHTML }}
+          className="block h-[400px] w-full overflow-auto whitespace-pre pt-6"
+        />
+      </div>
     </div>
   )
 }

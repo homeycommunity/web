@@ -10,11 +10,27 @@ export const runtime = "nodejs"
 
 const app = new Hono().basePath("/api/v1")
 
+// Register all routes
 app.get(homeyApps.url, homeyApps.description, auth, homeyApps.handler)
 app.route("/app", versionRoute)
 
+// Add better error handling for OpenAPI spec
 app.get(
   "/openapi",
+  async (c, next) => {
+    try {
+      await next()
+    } catch (error) {
+      console.error("OpenAPI spec generation error:", error)
+      return c.json(
+        {
+          error: "Failed to generate API documentation",
+          details: error instanceof Error ? error.message : "Unknown error",
+        },
+        500
+      )
+    }
+  },
   openAPISpecs(app, {
     documentation: {
       info: {
@@ -28,6 +44,7 @@ app.get(
             type: "http",
             scheme: "bearer",
             bearerFormat: "apikey",
+            description: "API key must be provided as a Bearer token",
           },
         },
       },
@@ -36,6 +53,16 @@ app.get(
         {
           url: process.env.AUTH_URL || "http://localhost:3000",
           description: "API Server",
+        },
+      ],
+      tags: [
+        {
+          name: "version",
+          description: "App version related operations",
+        },
+        {
+          name: "homey",
+          description: "Homey device related operations",
         },
       ],
     },
