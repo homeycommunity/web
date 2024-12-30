@@ -1,3 +1,4 @@
+import { File } from "buffer"
 import { Readable } from "stream"
 import { NextResponse } from "next/server"
 import { Client } from "minio"
