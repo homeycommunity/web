@@ -39,7 +39,6 @@ export default async function StorePage({
         orderBy: {
           version: "desc",
         },
-        take: 1,
       },
       author: true,
     },

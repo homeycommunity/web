@@ -34,14 +34,18 @@ export function StoreIdentifierView({
   app: App & { versions: AppVersion[]; author: User }
   homeys: (Homey & { HomeyApp: HomeyApp[] })[]
 }) {
-  const currentVersion = app.versions[0]
-  const appInfo = currentVersion.appinfo as unknown as AppInfo
+  const [selectedVersion, setSelectedVersion] = useState(app.versions[0])
+  const appInfo = selectedVersion.appinfo as unknown as AppInfo
   const [currentDriver, setCurrentDriver] = useState<
     AppInfo["drivers"][0] | null
   >(null)
   const homeysConnected = useConnectionMultiple(homeys)
   const [isInstalling, setIsInstalling] = useState(false)
-  const downloadApp = async (url: string, homeyId: string) => {
+  const downloadApp = async (
+    url: string,
+    homeyId: string,
+    version = selectedVersion
+  ) => {
     try {
       setIsInstalling(true)
       toast.info(`Installing ${app.name} app on Homey`)
@@ -54,7 +58,7 @@ export function StoreIdentifierView({
 
       // Download the store
       const storeResponse = await fetch(
-        `/api/hcs/apps/${app.identifier}/download/${app.versions[0].version}`,
+        `/api/hcs/apps/${app.identifier}/download/${version.version}`,
         {
           method: "GET",
           credentials: "include",
@@ -66,7 +70,7 @@ export function StoreIdentifierView({
       console.log(blob.size)
       const formData = new FormData()
       formData.append("app", blob, "app.tar.gz")
-      formData.append("env", (app.versions[0].env as string) || "{}")
+      formData.append("env", (version.env as string) || "{}")
       formData.append("purgeSettings", "false")
       formData.append("debug", "false")
       // Use the store install endpoint to trigger installation
@@ -113,9 +117,9 @@ export function StoreIdentifierView({
 
           <div className="flex flex-wrap items-center gap-3">
             <Badge variant="secondary" className="flex items-center gap-1.5">
-              <Tag className="size-3.5" />v{currentVersion.version}
+              <Tag className="size-3.5" />v{selectedVersion.version}
             </Badge>
-            {currentVersion.experimental && (
+            {selectedVersion.experimental && (
               <Badge
                 variant="destructive"
                 className="flex items-center gap-1.5"
@@ -128,6 +132,24 @@ export function StoreIdentifierView({
               <UserIcon className="size-3.5" />
               {app.author.name}
             </Badge>
+            {app.versions.length > 1 && (
+              <select
+                className="ml-2 rounded border border-primary/20 bg-background px-2 py-1 text-sm"
+                value={selectedVersion.version}
+                onChange={(e) => {
+                  const v = app.versions.find(
+                    (ver) => ver.version === e.target.value
+                  )
+                  if (v) setSelectedVersion(v)
+                }}
+              >
+                {app.versions.map((ver) => (
+                  <option key={ver.version} value={ver.version}>
+                    v{ver.version} {ver.experimental ? "(experimental)" : ""}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           <p className="max-w-[700px] text-xl leading-relaxed text-muted-foreground">
@@ -159,7 +181,7 @@ export function StoreIdentifierView({
                               "/install/" +
                               homey.id +
                               "?version=" +
-                              app.versions[0].version,
+                              selectedVersion.version,
                             {
                               method: "POST",
                             }
@@ -186,7 +208,11 @@ export function StoreIdentifierView({
                     <Button
                       key={"direct-" + homey.homeyId}
                       onClick={() =>
-                        downloadApp(homey.workingUrl!, homey.homeyId)
+                        downloadApp(
+                          homey.workingUrl!,
+                          homey.homeyId,
+                          selectedVersion
+                        )
                       }
                       variant="blue"
                     >
