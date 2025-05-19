@@ -124,7 +124,7 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
                 eventKey: id.key,
               },
             })
-            await storeApps(apps, homey.homeyId)
+            await storeApps(apps, homey.id)
             emitter.off("keygen", call)
             emitter.disconnect()
             resolve(true)

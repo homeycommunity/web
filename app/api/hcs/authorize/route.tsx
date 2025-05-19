@@ -162,7 +162,7 @@ export const POST = requireAuth(async (req: AuthenticatedRequest) => {
           sessionToken: encryptToken(sessionToken, encryptionKey),
         },
       })
-      await storeApps(apps, homey.homeyId)
+      await storeApps(apps, homey.id)
     })
   )
 
