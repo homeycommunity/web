@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { Homey } from "@prisma/client"
 
 export function useConnectionMultiple(homeys: Homey[]) {
@@ -10,8 +10,19 @@ export function useConnectionMultiple(homeys: Homey[]) {
     }[]
   >([])
 
+  const abortControllersRef = useRef<Map<string, AbortController>>(new Map())
+  const timeoutIdsRef = useRef<Map<string, NodeJS.Timeout>>(new Map())
+
   useEffect(() => {
     const checkConnections = async () => {
+      // Cancel any ongoing requests
+      abortControllersRef.current.forEach((controller) => controller.abort())
+      abortControllersRef.current.clear()
+
+      // Clear any existing timeouts
+      timeoutIdsRef.current.forEach((timeoutId) => clearTimeout(timeoutId))
+      timeoutIdsRef.current.clear()
+
       const newHomeysConnected = await Promise.all(
         homeys.map(async (homey) => {
           const urls = [homey.localUrl, homey.remoteForwardedUrl].filter(
@@ -19,6 +30,7 @@ export function useConnectionMultiple(homeys: Homey[]) {
           )
           let isConnected = false
           let workingUrl = null
+
           if (urls.length === 0) {
             return {
               homeyId: homey.homeyId,
@@ -26,9 +38,13 @@ export function useConnectionMultiple(homeys: Homey[]) {
               workingUrl: null,
             }
           }
+
           try {
             const controller = new AbortController()
+            abortControllersRef.current.set(homey.homeyId, controller)
+
             const timeoutId = setTimeout(() => controller.abort(), 2000) // 2s timeout
+            timeoutIdsRef.current.set(homey.homeyId, timeoutId)
 
             // Try each URL until one succeeds
             for (const url of urls) {
@@ -37,7 +53,16 @@ export function useConnectionMultiple(homeys: Homey[]) {
                   signal: controller.signal,
                   mode: "no-cors", // Since we just want to check if it's reachable
                 })
-                clearTimeout(timeoutId)
+
+                // Clear timeout on success
+                const currentTimeoutId = timeoutIdsRef.current.get(
+                  homey.homeyId
+                )
+                if (currentTimeoutId) {
+                  clearTimeout(currentTimeoutId)
+                  timeoutIdsRef.current.delete(homey.homeyId)
+                }
+
                 isConnected = true
                 workingUrl = url
                 break // Exit once we find a working connection
@@ -48,6 +73,14 @@ export function useConnectionMultiple(homeys: Homey[]) {
           } catch (error) {
             isConnected = false
             workingUrl = null
+          } finally {
+            // Clean up for this homey
+            const currentTimeoutId = timeoutIdsRef.current.get(homey.homeyId)
+            if (currentTimeoutId) {
+              clearTimeout(currentTimeoutId)
+              timeoutIdsRef.current.delete(homey.homeyId)
+            }
+            abortControllersRef.current.delete(homey.homeyId)
           }
 
           return {
@@ -65,7 +98,17 @@ export function useConnectionMultiple(homeys: Homey[]) {
       checkConnections()
       // Check connections every 30 seconds
       const interval = setInterval(checkConnections, 30000)
-      return () => clearInterval(interval)
+      return () => {
+        clearInterval(interval)
+        // Clean up all ongoing requests and timeouts
+        abortControllersRef.current.forEach((controller) => controller.abort())
+        abortControllersRef.current.clear()
+        timeoutIdsRef.current.forEach((timeoutId) => clearTimeout(timeoutId))
+        timeoutIdsRef.current.clear()
+      }
+    } else {
+      // If no homeys, clear the state
+      setHomeysConnected([])
     }
   }, [homeys])
 
