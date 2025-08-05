@@ -10,6 +10,8 @@ import { Separator } from "@/components/ui/separator"
 import { AppsList } from "./apps-list"
 import { InstallHCS } from "./install-hcs"
 
+export const dynamic = "force-dynamic"
+
 interface PageProps {
   params: Promise<{
     homeyId: string

@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 
 import { requireAuth } from "../../middleware"
 
+export const dynamic = "force-dynamic"
+
 export const GET = requireAuth(
   async (
     request: Request,

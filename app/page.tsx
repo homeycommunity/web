@@ -4,6 +4,8 @@ import { Download, Gift, Heart, Package } from "lucide-react"
 import { buttonVariants } from "@/components/ui/button"
 import { Card, CardContent } from "@/components/ui/card"
 
+export const dynamic = "force-dynamic"
+
 export default function IndexPage() {
   return (
     <section className="container relative">

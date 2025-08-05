@@ -16,6 +16,8 @@ import {
   transformOpenAPIToEndpoints,
 } from "./lib/fetch-openapi"
 
+export const dynamic = "force-dynamic"
+
 export default function ApiDocsPage() {
   const [apiKey, setApiKey] = useState("")
   const [expandedEndpoint, setExpandedEndpoint] = useState<string>("")

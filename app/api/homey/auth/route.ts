@@ -9,6 +9,8 @@ import { encryptToken, generateEncryptionKey } from "@/lib/token-encryption"
 
 import { AuthenticatedRequest, requireAuth } from "../../middleware"
 
+export const dynamic = "force-dynamic"
+
 export const POST = requireAuth(async (req: AuthenticatedRequest) => {
   const { email, password, twoFactor } = await req.json()
 

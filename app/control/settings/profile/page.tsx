@@ -13,6 +13,8 @@ export const metadata: Metadata = {
   description: "Manage your profile settings and connect your Homey",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function ProfilePage() {
   const session = await auth()
 
@@ -51,7 +53,8 @@ export default async function ProfilePage() {
         )}
         <HomeyConnectionForm isConnected={!!homeyToken} />
         <p className="text-muted-foreground mt-4">
-          Note: This is a workaround until we get credentials for OAuth from Athom (Homey).
+          Note: This is a workaround until we get credentials for OAuth from
+          Athom (Homey).
         </p>
         <p className="text-muted-foreground mt-4">
           Disclaimer: We don&apos;t store your Athom (Homey) credentials.

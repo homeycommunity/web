@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma"
 import { decryptToken } from "@/lib/token-encryption"
 import { AuthenticatedRequest, requireAuth } from "@/app/api/middleware"
 
+export const dynamic = "force-dynamic"
+
 export const GET = requireAuth(
   requireScopes<{ params: Promise<{ identifier: string }> }>(["homey:devices"])(
     async (

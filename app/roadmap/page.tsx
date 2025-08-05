@@ -10,6 +10,8 @@ import {
   TableRow,
 } from "@/components/ui/table"
 
+export const dynamic = "force-dynamic"
+
 export default function RoadmapPage() {
   return (
     <section className="container relative min-h-screen">

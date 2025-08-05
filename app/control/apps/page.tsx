@@ -11,6 +11,8 @@ import {
 import { AppPlus } from "@/app/control/apps/app-plus"
 import { AppRow } from "@/app/control/apps/app-row"
 
+export const dynamic = "force-dynamic"
+
 export default async function Page() {
   const prisma = new PrismaClient()
   const session = await auth()

@@ -4,6 +4,8 @@ import { prisma } from "@/lib/prisma"
 
 import { requireAuth, type AuthenticatedRequest } from "../middleware"
 
+export const dynamic = "force-dynamic"
+
 // List API keys
 export const GET = requireAuth(async (req: AuthenticatedRequest) => {
   const apiKeys = await prisma.apiKey.findMany({

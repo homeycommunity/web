@@ -6,6 +6,8 @@ import versionRoute from "./_endpoints/app/version"
 import { homeyApps } from "./_endpoints/homey/[homeyId]/apps"
 import { auth } from "./_middleware/auth"
 
+export const dynamic = "force-dynamic"
+
 export const runtime = "nodejs"
 
 const app = new Hono().basePath("/api/v1")

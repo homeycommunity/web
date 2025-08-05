@@ -3,6 +3,8 @@ import { auth } from "auth"
 
 import { ApiKeysForm } from "./api-keys-form"
 
+export const dynamic = "force-dynamic"
+
 export default async function ApiKeysPage() {
   const session = await auth()
 

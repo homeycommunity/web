@@ -8,6 +8,8 @@ import { decryptToken } from "@/lib/token-encryption"
 
 import { AuthenticatedRequest, requireAuth } from "../../middleware"
 
+export const dynamic = "force-dynamic"
+
 export const POST = requireAuth(async (req: AuthenticatedRequest) => {
   try {
     const token = await prisma.homeyToken.findFirst({

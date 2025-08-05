@@ -2,6 +2,8 @@ import { auth } from "@/auth"
 
 import { prisma } from "@/lib/prisma"
 
+export const dynamic = "force-dynamic"
+
 export async function PATCH(req: Request) {
   try {
     const session = await auth()

@@ -16,6 +16,8 @@ export const metadata: Metadata = {
   description: "Manage your connected Homey devices",
 }
 
+export const dynamic = "force-dynamic"
+
 export default async function HomeysPage() {
   const session = await auth()
 

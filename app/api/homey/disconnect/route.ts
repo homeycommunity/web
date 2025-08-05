@@ -2,6 +2,8 @@ import { prisma } from "@/lib/prisma"
 
 import { AuthenticatedRequest, requireAuth } from "../../middleware"
 
+export const dynamic = "force-dynamic"
+
 export const POST = requireAuth(async (req: AuthenticatedRequest) => {
   try {
     // Delete the homey token
