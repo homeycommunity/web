@@ -35,14 +35,39 @@ export function useConnection(urls: string | string[]) {
           controller.abort()
         }, 2000) // 2s timeout
 
-        // Try each URL until one succeeds
-        for (const url of urlsToCheck) {
+        // Create promises for all URLs to check them simultaneously
+        const connectionPromises = urlsToCheck.map(async (url) => {
           try {
             const response = await fetch(url, {
               signal: controller.signal,
               mode: "no-cors", // Since we just want to check if it's reachable
             })
+            return { success: true, url }
+          } catch (error) {
+            return { success: false, url, error }
+          }
+        })
 
+        // Race all promises - first successful one wins
+        const result = await Promise.race(connectionPromises)
+
+        if (result.success) {
+          // Clear timeout on success
+          if (timeoutIdRef.current) {
+            clearTimeout(timeoutIdRef.current)
+            timeoutIdRef.current = null
+          }
+
+          setIsConnected(true)
+          setWorkingUrl(result.url)
+        } else {
+          // If the first result was a failure, wait for all to complete
+          const allResults = await Promise.allSettled(connectionPromises)
+          const successfulResult = allResults.find(
+            (result) => result.status === "fulfilled" && result.value.success
+          )
+
+          if (successfulResult && successfulResult.status === "fulfilled") {
             // Clear timeout on success
             if (timeoutIdRef.current) {
               clearTimeout(timeoutIdRef.current)
@@ -50,17 +75,13 @@ export function useConnection(urls: string | string[]) {
             }
 
             setIsConnected(true)
-            setWorkingUrl(url)
-            return // Exit once we find a working connection
-          } catch (error) {
-            // Continue to next URL if this one fails
-            continue
+            setWorkingUrl(successfulResult.value.url)
+          } else {
+            // All URLs failed
+            setIsConnected(false)
+            setWorkingUrl(null)
           }
         }
-
-        // If we get here, all URLs failed
-        setIsConnected(false)
-        setWorkingUrl(null)
       } catch (error) {
         setIsConnected(false)
         setWorkingUrl(null)

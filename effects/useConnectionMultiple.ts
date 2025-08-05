@@ -46,14 +46,41 @@ export function useConnectionMultiple(homeys: Homey[]) {
             const timeoutId = setTimeout(() => controller.abort(), 2000) // 2s timeout
             timeoutIdsRef.current.set(homey.homeyId, timeoutId)
 
-            // Try each URL until one succeeds
-            for (const url of urls) {
+            // Create promises for all URLs to check them simultaneously
+            const connectionPromises = urls.map(async (url) => {
               try {
                 const response = await fetch(url!, {
                   signal: controller.signal,
                   mode: "no-cors", // Since we just want to check if it's reachable
                 })
+                return { success: true, url }
+              } catch (error) {
+                return { success: false, url, error }
+              }
+            })
 
+            // Race all promises - first successful one wins
+            const result = await Promise.race(connectionPromises)
+
+            if (result.success) {
+              // Clear timeout on success
+              const currentTimeoutId = timeoutIdsRef.current.get(homey.homeyId)
+              if (currentTimeoutId) {
+                clearTimeout(currentTimeoutId)
+                timeoutIdsRef.current.delete(homey.homeyId)
+              }
+
+              isConnected = true
+              workingUrl = result.url
+            } else {
+              // If the first result was a failure, wait for all to complete
+              const allResults = await Promise.allSettled(connectionPromises)
+              const successfulResult = allResults.find(
+                (result) =>
+                  result.status === "fulfilled" && result.value.success
+              )
+
+              if (successfulResult && successfulResult.status === "fulfilled") {
                 // Clear timeout on success
                 const currentTimeoutId = timeoutIdsRef.current.get(
                   homey.homeyId
@@ -64,10 +91,7 @@ export function useConnectionMultiple(homeys: Homey[]) {
                 }
 
                 isConnected = true
-                workingUrl = url
-                break // Exit once we find a working connection
-              } catch {
-                continue // Try next URL if this one fails
+                workingUrl = successfulResult.value.url
               }
             }
           } catch (error) {
