@@ -17,7 +17,7 @@ export async function OPTIONS() {
 export const dynamic = "force-dynamic"
 
 // Protect GET with read:apps scope
-export const GET = async (req: AuthenticatedRequest) => {
+export const GET = async () => {
   const apps = await prisma.app.findMany({
     where: {
       versions: {

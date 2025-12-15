@@ -1,8 +1,6 @@
-import { NextResponse } from "next/server"
+import { NextResponse, type NextRequest } from "next/server"
 
 import { prisma } from "@/lib/prisma"
-
-import { type AuthenticatedRequest } from "../../../middleware"
 
 export const dynamic = "force-dynamic"
 export const fetchCache = "force-no-store"
@@ -14,10 +12,7 @@ type RouteContext = {
   }>
 }
 
-export const GET = async (
-  request: AuthenticatedRequest,
-  { params }: RouteContext
-) => {
+export const GET = async (request: NextRequest, { params }: RouteContext) => {
   const apps = await prisma.app.findMany({
     where: {
       identifier: (await params).identifier,
